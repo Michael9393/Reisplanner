@@ -1,0 +1,1462 @@
+{
+  "meta": {
+    "id": "trip-east-asia-2027",
+    "title": "Oost-Azië 2027",
+    "startDate": "2027-05-10",
+    "endDate": "2027-09-13",
+    "durationWeeks": 18,
+    "currency": "EUR",
+    "schemaVersion": 1
+  },
+  "destinations": [
+    {
+      "id": "cn-beijing",
+      "name": "Beijing",
+      "country": "China",
+      "coords": { "lat": 39.9042, "lng": 116.4074 },
+      "activities": ["stad", "cultuur", "Chinese Muur"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-05-H1",
+          "rating": 4,
+          "hazards": ["drukte"],
+          "note": "Aangenaam voorjaar; rond 1 mei Gouden Week-drukte."
+        },
+        {
+          "period": "2027-05-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Warm en overwegend droog, goede periode voor stad en Muur."
+        }
+      ],
+      "notes": "Aankomststad. Muurbezoek: Mutianyu of Jiankou."
+    },
+    {
+      "id": "cn-xian",
+      "name": "Xi'an",
+      "country": "China",
+      "coords": { "lat": 34.3416, "lng": 108.9398 },
+      "activities": ["cultuur", "geschiedenis", "eten"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-05-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Warm maar nog vóór de echte zomerhitte."
+        },
+        {
+          "period": "2027-06-H1",
+          "rating": 3,
+          "hazards": ["hitte"],
+          "note": "Kan al boven de 30°C komen."
+        }
+      ],
+      "notes": "Terracottaleger, stadsmuur fietsen, Muslim Quarter."
+    },
+    {
+      "id": "cn-chengdu",
+      "name": "Chengdu",
+      "country": "China",
+      "coords": { "lat": 30.5728, "lng": 104.0668 },
+      "activities": ["panda's", "eten", "theehuizen"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-05-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Mild en groen; goede periode."
+        },
+        {
+          "period": "2027-06-H1",
+          "rating": 3,
+          "hazards": ["regen", "hitte"],
+          "note": "Begin van het natte, benauwde seizoen."
+        }
+      ],
+      "notes": "Pandacentrum vroeg in de ochtend bezoeken."
+    },
+    {
+      "id": "cn-zhangjiajie",
+      "name": "Zhangjiajie",
+      "country": "China",
+      "coords": { "lat": 29.117, "lng": 110.4794 },
+      "activities": ["natuur", "wandelen", "uitzichten"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-05-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Goede wandelperiode, alles groen."
+        },
+        {
+          "period": "2027-06-H1",
+          "rating": 3,
+          "hazards": ["regen"],
+          "note": "Kans op regen en mist tussen de pilaren."
+        }
+      ],
+      "notes": "Avatar-bergen; Tianmen Mountain als dagtrip."
+    },
+    {
+      "id": "tw-taipei",
+      "name": "Taipei",
+      "country": "Taiwan",
+      "coords": { "lat": 25.033, "lng": 121.5654 },
+      "activities": ["stad", "nachtmarkten", "eten"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-06-H1",
+          "rating": 3,
+          "hazards": ["regen", "hitte"],
+          "note": "Staart van het meiyu-regenseizoen; benauwd."
+        },
+        {
+          "period": "2027-06-H2",
+          "rating": 3,
+          "hazards": ["hitte"],
+          "note": "Heet en vochtig, maar veel binnenopties."
+        }
+      ],
+      "notes": "Basis voor dagtrips: Jiufen, Yangmingshan, Beitou."
+    },
+    {
+      "id": "tw-hualien",
+      "name": "Hualien (Taroko)",
+      "country": "Taiwan",
+      "coords": { "lat": 23.9769, "lng": 121.6044 },
+      "activities": ["natuur", "fietsen", "kloven"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-06-H2",
+          "rating": 3,
+          "hazards": ["regen", "hitte"],
+          "note": "Oostkust: kans op stevige buien, verder groen en rustig."
+        }
+      ],
+      "notes": "Start van de fietsroute langs de oostkust. Fietsen nog niet hard gepland."
+    },
+    {
+      "id": "tw-taitung",
+      "name": "Taitung",
+      "country": "Taiwan",
+      "coords": { "lat": 22.7583, "lng": 121.1444 },
+      "activities": ["fietsen", "kust", "rijstvelden"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-06-H2",
+          "rating": 3,
+          "hazards": ["hitte"],
+          "note": "Warm; vroeg vertrekken op de fiets."
+        }
+      ],
+      "notes": "East Rift Valley of kustroute; Green Island als optie."
+    },
+    {
+      "id": "tw-kaohsiung",
+      "name": "Kaohsiung",
+      "country": "Taiwan",
+      "coords": { "lat": 22.6273, "lng": 120.3014 },
+      "activities": ["stad", "haven", "tempels"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-06-H2",
+          "rating": 3,
+          "hazards": ["hitte"],
+          "note": "Tropisch heet; havenstad met veel schaduwrijke parken."
+        },
+        {
+          "period": "2027-07-H1",
+          "rating": 2,
+          "hazards": ["tyfoon", "hitte"],
+          "note": "Tyfoonseizoen komt op gang; niet te laat in juli vertrekken."
+        }
+      ],
+      "notes": "Vertrekpunt richting Japan; Lotus Pond en Cijin-eiland."
+    },
+    {
+      "id": "tw-alishan",
+      "name": "Alishan",
+      "country": "Taiwan",
+      "coords": { "lat": 23.51, "lng": 120.8 },
+      "activities": ["bergen", "bostrein", "zonsopkomst"],
+      "status": "idee",
+      "seasonal": [
+        {
+          "period": "2027-06-H2",
+          "rating": 4,
+          "hazards": ["regen"],
+          "note": "Koel bergklimaat als pauze van de hitte; middagbuien."
+        }
+      ],
+      "notes": "Alternatief of aanvulling als het fietsplan niet doorgaat."
+    },
+    {
+      "id": "jp-sapporo",
+      "name": "Sapporo",
+      "country": "Japan",
+      "coords": { "lat": 43.0618, "lng": 141.3545 },
+      "activities": ["stad", "eten", "natuur"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-06-H2",
+          "rating": 5,
+          "hazards": [],
+          "note": "Koel en droog; Hokkaido kent geen echt regenseizoen."
+        },
+        {
+          "period": "2027-07-H1",
+          "rating": 5,
+          "hazards": [],
+          "note": "Ideale zomer: 20-25°C."
+        }
+      ],
+      "notes": "Aankomst vanuit Taiwan; basis voor Hokkaido."
+    },
+    {
+      "id": "jp-furano",
+      "name": "Furano & Biei",
+      "country": "Japan",
+      "coords": { "lat": 43.342, "lng": 142.3833 },
+      "activities": ["lavendel", "fietsen", "heuvellandschap"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-07-H1",
+          "rating": 5,
+          "hazards": ["drukte"],
+          "note": "Lavendelseizoen begint; velden kleuren paars."
+        },
+        {
+          "period": "2027-07-H2",
+          "rating": 4,
+          "hazards": ["drukte", "hoogseizoen"],
+          "note": "Piek van de lavendel is ook piek van de drukte."
+        }
+      ],
+      "notes": "Fietsen tussen de velden van Biei; Blue Pond."
+    },
+    {
+      "id": "jp-aomori",
+      "name": "Aomori",
+      "country": "Japan",
+      "coords": { "lat": 40.8222, "lng": 140.7474 },
+      "activities": ["natuur", "cultuur", "festivals"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-07-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Aangename zomer in Tohoku, na het regenseizoen."
+        },
+        {
+          "period": "2027-08-H1",
+          "rating": 4,
+          "hazards": ["drukte", "hoogseizoen"],
+          "note": "Nebuta-festival (2-7 aug): spectaculair maar erg druk."
+        }
+      ],
+      "notes": "Oirase-kloof en Towada-meer vanuit hier."
+    },
+    {
+      "id": "jp-sendai",
+      "name": "Sendai",
+      "country": "Japan",
+      "coords": { "lat": 38.2682, "lng": 140.8694 },
+      "activities": ["stad", "kust", "Matsushima"],
+      "status": "idee",
+      "seasonal": [
+        {
+          "period": "2027-07-H2",
+          "rating": 3,
+          "hazards": ["hitte"],
+          "note": "Warm en vochtig na het regenseizoen."
+        },
+        {
+          "period": "2027-08-H1",
+          "rating": 3,
+          "hazards": ["hitte", "drukte"],
+          "note": "Tanabata-festival (6-8 aug)."
+        }
+      ],
+      "notes": "Twijfelgeval: eventueel inkorten richting de Alpen."
+    },
+    {
+      "id": "jp-matsumoto",
+      "name": "Matsumoto",
+      "country": "Japan",
+      "coords": { "lat": 36.238, "lng": 137.972 },
+      "activities": ["bergen", "kasteel", "wandelen"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-07-H2",
+          "rating": 4,
+          "hazards": [],
+          "note": "Poort naar Kamikochi; in de bergen aangenaam koel."
+        },
+        {
+          "period": "2027-08-H1",
+          "rating": 4,
+          "hazards": ["drukte"],
+          "note": "Alpen koel, het dal warm; vakantiedrukte op hutten."
+        }
+      ],
+      "notes": "Kamikochi en Norikura; kasteel van Matsumoto."
+    },
+    {
+      "id": "jp-takayama",
+      "name": "Takayama",
+      "country": "Japan",
+      "coords": { "lat": 36.1408, "lng": 137.252 },
+      "activities": ["oude stad", "bergen", "sake"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-08-H1",
+          "rating": 4,
+          "hazards": ["hitte", "drukte"],
+          "note": "Warm in het dal; ochtenden en bergdorpen aangenaam."
+        }
+      ],
+      "notes": "Oude centrum, ochtendmarkten; Shirakawa-go als dagtrip."
+    },
+    {
+      "id": "jp-kyoto",
+      "name": "Kyoto",
+      "country": "Japan",
+      "coords": { "lat": 35.0116, "lng": 135.7681 },
+      "activities": ["tempels", "cultuur", "eten"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-08-H1",
+          "rating": 2,
+          "hazards": ["hitte", "drukte"],
+          "note": "Zeer heet en vochtig (35°C+); vroeg op pad, middag binnen."
+        },
+        {
+          "period": "2027-08-H2",
+          "rating": 2,
+          "hazards": ["hitte", "drukte", "hoogseizoen"],
+          "note": "Obon-vakantie (rond 13-16 aug): druk én heet."
+        }
+      ],
+      "notes": "Bewuste keuze ondanks hitte; alternatief is Kyoto inkorten."
+    },
+    {
+      "id": "jp-tokyo",
+      "name": "Tokyo",
+      "country": "Japan",
+      "coords": { "lat": 35.6762, "lng": 139.6503 },
+      "activities": ["stad", "eten", "musea"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-08-H2",
+          "rating": 2,
+          "hazards": ["hitte", "tyfoon"],
+          "note": "Hoogzomer: heet; kans op tyfonen neemt toe richting september."
+        }
+      ],
+      "notes": "Afsluiting Japan; veel airco-vriendelijke opties."
+    },
+    {
+      "id": "kr-busan",
+      "name": "Busan",
+      "country": "Zuid-Korea",
+      "coords": { "lat": 35.1796, "lng": 129.0756 },
+      "activities": ["kust", "stad", "seafood"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-08-H2",
+          "rating": 3,
+          "hazards": ["hitte", "drukte"],
+          "note": "Strandseizoen: warm zeewater, drukke stranden."
+        },
+        {
+          "period": "2027-09-H1",
+          "rating": 4,
+          "hazards": ["tyfoon"],
+          "note": "Aangenamer; tyfoonseizoen piekt, weerbericht volgen."
+        }
+      ],
+      "notes": "Aankomst vanuit Tokyo; Gamcheon, Haeundae, tempel aan zee."
+    },
+    {
+      "id": "kr-jeju",
+      "name": "Jeju",
+      "country": "Zuid-Korea",
+      "coords": { "lat": 33.4996, "lng": 126.5312 },
+      "activities": ["eiland", "fietsen", "vulkaan"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-08-H2",
+          "rating": 3,
+          "hazards": ["hitte", "tyfoon"],
+          "note": "Nazomer op het eiland; tyfoonkans is reëel."
+        },
+        {
+          "period": "2027-09-H1",
+          "rating": 4,
+          "hazards": ["tyfoon"],
+          "note": "Goed fiets- en wandelweer; Hallasan bij helder weer."
+        }
+      ],
+      "notes": "Rondje eiland fietsen (± 4 dagen) of Olle-trails."
+    },
+    {
+      "id": "kr-seoraksan",
+      "name": "Seoraksan (Sokcho)",
+      "country": "Zuid-Korea",
+      "coords": { "lat": 38.1196, "lng": 128.4655 },
+      "activities": ["bergen", "wandelen", "nationaal park"],
+      "status": "kandidaat",
+      "seasonal": [
+        {
+          "period": "2027-09-H1",
+          "rating": 4,
+          "hazards": [],
+          "note": "Fris bergweer, vóór de herfstkleurendrukte van oktober."
+        }
+      ],
+      "notes": "Ulsanbawi-hike; verblijf in Sokcho aan de kust."
+    },
+    {
+      "id": "kr-seoul",
+      "name": "Seoul",
+      "country": "Zuid-Korea",
+      "coords": { "lat": 37.5665, "lng": 126.978 },
+      "activities": ["stad", "cultuur", "eten"],
+      "status": "vast",
+      "seasonal": [
+        {
+          "period": "2027-09-H1",
+          "rating": 4,
+          "hazards": ["tyfoon"],
+          "note": "Nazomer wordt aangenaam; kleine tyfoonkans."
+        },
+        {
+          "period": "2027-09-H2",
+          "rating": 5,
+          "hazards": [],
+          "note": "Een van de beste periodes voor Seoul."
+        }
+      ],
+      "notes": "Eindpunt van de reis; paleizen, Bukhansan, markten."
+    }
+  ],
+  "itinerary": [
+    {
+      "id": "seg-beijing",
+      "destinationId": "cn-beijing",
+      "startDate": "2027-05-10",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Rustig landen na de vlucht; Muur midweeks."
+    },
+    {
+      "id": "seg-xian",
+      "destinationId": "cn-xian",
+      "startDate": "2027-05-17",
+      "nights": 6,
+      "status": "vast",
+      "notes": ""
+    },
+    {
+      "id": "seg-chengdu",
+      "destinationId": "cn-chengdu",
+      "startDate": "2027-05-23",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Eventueel dagtrip Leshan."
+    },
+    {
+      "id": "seg-zhangjiajie",
+      "destinationId": "cn-zhangjiajie",
+      "startDate": "2027-05-30",
+      "nights": 8,
+      "status": "vast",
+      "notes": "Meerdaags parkbezoek; buffer voor mistdagen."
+    },
+    {
+      "id": "seg-taipei",
+      "destinationId": "tw-taipei",
+      "startDate": "2027-06-07",
+      "nights": 6,
+      "status": "kandidaat",
+      "notes": "Fietsen regelen (huur of bagagetransport)."
+    },
+    {
+      "id": "seg-hualien",
+      "destinationId": "tw-hualien",
+      "startDate": "2027-06-13",
+      "nights": 5,
+      "status": "kandidaat",
+      "notes": "Taroko + start fietsroute."
+    },
+    {
+      "id": "seg-taitung",
+      "destinationId": "tw-taitung",
+      "startDate": "2027-06-18",
+      "nights": 5,
+      "status": "kandidaat",
+      "notes": "Fietsdagen langs kust of Rift Valley."
+    },
+    {
+      "id": "seg-kaohsiung",
+      "destinationId": "tw-kaohsiung",
+      "startDate": "2027-06-23",
+      "nights": 5,
+      "status": "kandidaat",
+      "notes": ""
+    },
+    {
+      "id": "seg-sapporo",
+      "destinationId": "jp-sapporo",
+      "startDate": "2027-06-28",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Acclimatiseren, dagtrips Otaru en Jozankei."
+    },
+    {
+      "id": "seg-furano",
+      "destinationId": "jp-furano",
+      "startDate": "2027-07-05",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Lavendel + fietsen in Biei."
+    },
+    {
+      "id": "seg-aomori",
+      "destinationId": "jp-aomori",
+      "startDate": "2027-07-12",
+      "nights": 7,
+      "status": "kandidaat",
+      "notes": "Oirase-kloof; ferry of trein vanaf Hakodate."
+    },
+    {
+      "id": "seg-sendai",
+      "destinationId": "jp-sendai",
+      "startDate": "2027-07-19",
+      "nights": 7,
+      "status": "idee",
+      "notes": "Twijfel: mogelijk inkorten en langer in de Alpen."
+    },
+    {
+      "id": "seg-matsumoto",
+      "destinationId": "jp-matsumoto",
+      "startDate": "2027-07-26",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Kamikochi 2-3 dagen, weerafhankelijk."
+    },
+    {
+      "id": "seg-takayama",
+      "destinationId": "jp-takayama",
+      "startDate": "2027-08-02",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Shirakawa-go als dagtrip."
+    },
+    {
+      "id": "seg-kyoto",
+      "destinationId": "jp-kyoto",
+      "startDate": "2027-08-09",
+      "nights": 7,
+      "status": "vast",
+      "notes": "Vroege ochtenden voor tempels; hitteplan."
+    },
+    {
+      "id": "seg-tokyo",
+      "destinationId": "jp-tokyo",
+      "startDate": "2027-08-16",
+      "nights": 7,
+      "status": "vast",
+      "notes": ""
+    },
+    {
+      "id": "seg-busan",
+      "destinationId": "kr-busan",
+      "startDate": "2027-08-23",
+      "nights": 5,
+      "status": "vast",
+      "notes": ""
+    },
+    {
+      "id": "seg-jeju",
+      "destinationId": "kr-jeju",
+      "startDate": "2027-08-28",
+      "nights": 6,
+      "status": "kandidaat",
+      "notes": "Fietsrondje of Olle-trails, weerafhankelijk."
+    },
+    {
+      "id": "seg-seoraksan",
+      "destinationId": "kr-seoraksan",
+      "startDate": "2027-09-03",
+      "nights": 4,
+      "status": "kandidaat",
+      "notes": ""
+    },
+    {
+      "id": "seg-seoul",
+      "destinationId": "kr-seoul",
+      "startDate": "2027-09-07",
+      "nights": 6,
+      "status": "vast",
+      "notes": "Eindpunt; inpakken en uitvliegen."
+    }
+  ],
+  "transport": [
+    {
+      "id": "tr-ams-beijing",
+      "fromDestinationId": null,
+      "toDestinationId": "cn-beijing",
+      "date": "2027-05-10",
+      "mode": "vlucht",
+      "label": "Amsterdam – Beijing",
+      "estimatedCost": 1400,
+      "notes": "Directe vlucht; bedragen voor 2 personen."
+    },
+    {
+      "id": "tr-beijing-xian",
+      "fromDestinationId": "cn-beijing",
+      "toDestinationId": "cn-xian",
+      "date": "2027-05-17",
+      "mode": "trein",
+      "label": "Hogesnelheidstrein Beijing – Xi'an",
+      "estimatedCost": 120,
+      "notes": "± 4,5 uur."
+    },
+    {
+      "id": "tr-xian-chengdu",
+      "fromDestinationId": "cn-xian",
+      "toDestinationId": "cn-chengdu",
+      "date": "2027-05-23",
+      "mode": "trein",
+      "label": "Hogesnelheidstrein Xi'an – Chengdu",
+      "estimatedCost": 100,
+      "notes": "± 3,5 uur."
+    },
+    {
+      "id": "tr-chengdu-zhangjiajie",
+      "fromDestinationId": "cn-chengdu",
+      "toDestinationId": "cn-zhangjiajie",
+      "date": "2027-05-30",
+      "mode": "trein",
+      "label": "Trein Chengdu – Zhangjiajie",
+      "estimatedCost": 110,
+      "notes": ""
+    },
+    {
+      "id": "tr-changsha-taipei",
+      "fromDestinationId": "cn-zhangjiajie",
+      "toDestinationId": "tw-taipei",
+      "date": "2027-06-07",
+      "mode": "vlucht",
+      "label": "Changsha – Taipei (trein naar Changsha vooraf)",
+      "estimatedCost": 360,
+      "notes": "Alternatief: via Hongkong."
+    },
+    {
+      "id": "tr-taipei-hualien",
+      "fromDestinationId": "tw-taipei",
+      "toDestinationId": "tw-hualien",
+      "date": "2027-06-13",
+      "mode": "trein",
+      "label": "Trein Taipei – Hualien",
+      "estimatedCost": 30,
+      "notes": "Fietsen kunnen mee op aangewezen treinen."
+    },
+    {
+      "id": "tr-hualien-taitung",
+      "fromDestinationId": "tw-hualien",
+      "toDestinationId": "tw-taitung",
+      "date": "2027-06-18",
+      "mode": "fiets",
+      "label": "Fietsen oostkust: Hualien – Taitung",
+      "estimatedCost": null,
+      "notes": "± 170 km in 3-4 etappes; fietshuur in budget."
+    },
+    {
+      "id": "tr-taitung-kaohsiung",
+      "fromDestinationId": "tw-taitung",
+      "toDestinationId": "tw-kaohsiung",
+      "date": "2027-06-23",
+      "mode": "trein",
+      "label": "Trein Taitung – Kaohsiung",
+      "estimatedCost": 25,
+      "notes": ""
+    },
+    {
+      "id": "tr-kaohsiung-sapporo",
+      "fromDestinationId": "tw-kaohsiung",
+      "toDestinationId": "jp-sapporo",
+      "date": "2027-06-28",
+      "mode": "vlucht",
+      "label": "Kaohsiung – Sapporo (via Taipei)",
+      "estimatedCost": 500,
+      "notes": ""
+    },
+    {
+      "id": "tr-sapporo-furano",
+      "fromDestinationId": "jp-sapporo",
+      "toDestinationId": "jp-furano",
+      "date": "2027-07-05",
+      "mode": "trein",
+      "label": "Trein Sapporo – Furano",
+      "estimatedCost": 30,
+      "notes": ""
+    },
+    {
+      "id": "tr-furano-aomori",
+      "fromDestinationId": "jp-furano",
+      "toDestinationId": "jp-aomori",
+      "date": "2027-07-12",
+      "mode": "trein",
+      "label": "Furano – Aomori (shinkansen via Hakodate)",
+      "estimatedCost": 160,
+      "notes": "Lange reisdag; Seikan-tunnel."
+    },
+    {
+      "id": "tr-aomori-sendai",
+      "fromDestinationId": "jp-aomori",
+      "toDestinationId": "jp-sendai",
+      "date": "2027-07-19",
+      "mode": "trein",
+      "label": "Shinkansen Aomori – Sendai",
+      "estimatedCost": 100,
+      "notes": ""
+    },
+    {
+      "id": "tr-sendai-matsumoto",
+      "fromDestinationId": "jp-sendai",
+      "toDestinationId": "jp-matsumoto",
+      "date": "2027-07-26",
+      "mode": "trein",
+      "label": "Sendai – Matsumoto (via Omiya)",
+      "estimatedCost": 140,
+      "notes": ""
+    },
+    {
+      "id": "tr-matsumoto-takayama",
+      "fromDestinationId": "jp-matsumoto",
+      "toDestinationId": "jp-takayama",
+      "date": "2027-08-02",
+      "mode": "bus",
+      "label": "Bus Matsumoto – Takayama",
+      "estimatedCost": 50,
+      "notes": "Mooie route door de Alpen."
+    },
+    {
+      "id": "tr-takayama-kyoto",
+      "fromDestinationId": "jp-takayama",
+      "toDestinationId": "jp-kyoto",
+      "date": "2027-08-09",
+      "mode": "trein",
+      "label": "Takayama – Kyoto (via Nagoya)",
+      "estimatedCost": 90,
+      "notes": ""
+    },
+    {
+      "id": "tr-kyoto-tokyo",
+      "fromDestinationId": "jp-kyoto",
+      "toDestinationId": "jp-tokyo",
+      "date": "2027-08-16",
+      "mode": "trein",
+      "label": "Shinkansen Kyoto – Tokyo",
+      "estimatedCost": 180,
+      "notes": ""
+    },
+    {
+      "id": "tr-tokyo-busan",
+      "fromDestinationId": "jp-tokyo",
+      "toDestinationId": "kr-busan",
+      "date": "2027-08-23",
+      "mode": "vlucht",
+      "label": "Tokyo – Busan",
+      "estimatedCost": 300,
+      "notes": ""
+    },
+    {
+      "id": "tr-busan-jeju",
+      "fromDestinationId": "kr-busan",
+      "toDestinationId": "kr-jeju",
+      "date": "2027-08-28",
+      "mode": "vlucht",
+      "label": "Busan – Jeju",
+      "estimatedCost": 80,
+      "notes": ""
+    },
+    {
+      "id": "tr-jeju-seoraksan",
+      "fromDestinationId": "kr-jeju",
+      "toDestinationId": "kr-seoraksan",
+      "date": "2027-09-03",
+      "mode": "vlucht",
+      "label": "Jeju – Seoul (Gimpo), bus naar Sokcho",
+      "estimatedCost": 110,
+      "notes": "Vlucht + expresbus op dezelfde dag."
+    },
+    {
+      "id": "tr-seoraksan-seoul",
+      "fromDestinationId": "kr-seoraksan",
+      "toDestinationId": "kr-seoul",
+      "date": "2027-09-07",
+      "mode": "bus",
+      "label": "Expresbus Sokcho – Seoul",
+      "estimatedCost": 30,
+      "notes": ""
+    },
+    {
+      "id": "tr-seoul-ams",
+      "fromDestinationId": "kr-seoul",
+      "toDestinationId": null,
+      "date": "2027-09-13",
+      "mode": "vlucht",
+      "label": "Seoul – Amsterdam",
+      "estimatedCost": 1300,
+      "notes": "Terugvlucht."
+    }
+  ],
+  "budget": {
+    "categories": [
+      { "id": "cat-flights", "label": "Vluchten" },
+      { "id": "cat-transport", "label": "Transport binnen Azië" },
+      { "id": "cat-stays", "label": "Verblijf" },
+      { "id": "cat-food", "label": "Eten & drinken" },
+      { "id": "cat-activities", "label": "Activiteiten" },
+      { "id": "cat-bike", "label": "Fietslogistiek" },
+      { "id": "cat-visa", "label": "Visa & verzekering" },
+      { "id": "cat-gear", "label": "Gear" },
+      { "id": "cat-buffer", "label": "Buffer" }
+    ],
+    "items": [
+      {
+        "id": "b-vlucht-heen",
+        "categoryId": "cat-flights",
+        "label": "Amsterdam – Beijing",
+        "amountPlanned": 1400,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-ams-beijing",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "2 personen."
+      },
+      {
+        "id": "b-vlucht-taiwan",
+        "categoryId": "cat-flights",
+        "label": "Changsha – Taipei",
+        "amountPlanned": 360,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-changsha-taipei",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-vlucht-japan",
+        "categoryId": "cat-flights",
+        "label": "Kaohsiung – Sapporo",
+        "amountPlanned": 500,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-kaohsiung-sapporo",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-vlucht-korea",
+        "categoryId": "cat-flights",
+        "label": "Tokyo – Busan",
+        "amountPlanned": 300,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-tokyo-busan",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-vlucht-jeju",
+        "categoryId": "cat-flights",
+        "label": "Busan – Jeju en Jeju – Seoul",
+        "amountPlanned": 190,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-busan-jeju",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Binnenlandse vluchten Korea samengenomen."
+      },
+      {
+        "id": "b-vlucht-terug",
+        "categoryId": "cat-flights",
+        "label": "Seoul – Amsterdam",
+        "amountPlanned": 1300,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": "tr-seoul-ams",
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-trein-china",
+        "categoryId": "cat-transport",
+        "label": "Treinen China",
+        "amountPlanned": 330,
+        "amountActual": null,
+        "destinationId": "cn-beijing",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Som van de drie hogesnelheidstrajecten."
+      },
+      {
+        "id": "b-ov-taiwan",
+        "categoryId": "cat-transport",
+        "label": "Treinen & bussen Taiwan",
+        "amountPlanned": 100,
+        "amountActual": null,
+        "destinationId": "tw-taipei",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-trein-japan",
+        "categoryId": "cat-transport",
+        "label": "Treinen Japan (incl. shinkansen)",
+        "amountPlanned": 800,
+        "amountActual": null,
+        "destinationId": "jp-sapporo",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Losse kaartjes; JR-pass loont waarschijnlijk niet bij dit tempo."
+      },
+      {
+        "id": "b-ov-korea",
+        "categoryId": "cat-transport",
+        "label": "Transport Korea",
+        "amountPlanned": 200,
+        "amountActual": null,
+        "destinationId": "kr-seoul",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-ov-lokaal",
+        "categoryId": "cat-transport",
+        "label": "Metro's & lokaal OV overal",
+        "amountPlanned": 300,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Globale post."
+      },
+      {
+        "id": "b-verblijf-china",
+        "categoryId": "cat-stays",
+        "label": "Verblijf China (28 nachten)",
+        "amountPlanned": 1550,
+        "amountActual": null,
+        "destinationId": "cn-beijing",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €55 per nacht voor 2 personen."
+      },
+      {
+        "id": "b-verblijf-taiwan",
+        "categoryId": "cat-stays",
+        "label": "Verblijf Taiwan (21 nachten)",
+        "amountPlanned": 1400,
+        "amountActual": null,
+        "destinationId": "tw-taipei",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €65 per nacht."
+      },
+      {
+        "id": "b-verblijf-japan",
+        "categoryId": "cat-stays",
+        "label": "Verblijf Japan (56 nachten)",
+        "amountPlanned": 4750,
+        "amountActual": null,
+        "destinationId": "jp-sapporo",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €85 per nacht; mix van business hotels en guesthouses."
+      },
+      {
+        "id": "b-verblijf-korea",
+        "categoryId": "cat-stays",
+        "label": "Verblijf Korea (21 nachten)",
+        "amountPlanned": 1500,
+        "amountActual": null,
+        "destinationId": "kr-seoul",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €70 per nacht."
+      },
+      {
+        "id": "b-eten-china",
+        "categoryId": "cat-food",
+        "label": "Eten China",
+        "amountPlanned": 850,
+        "amountActual": null,
+        "destinationId": "cn-beijing",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €30 per dag."
+      },
+      {
+        "id": "b-eten-taiwan",
+        "categoryId": "cat-food",
+        "label": "Eten Taiwan",
+        "amountPlanned": 750,
+        "amountActual": null,
+        "destinationId": "tw-taipei",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Nachtmarkten houden het betaalbaar."
+      },
+      {
+        "id": "b-eten-japan",
+        "categoryId": "cat-food",
+        "label": "Eten Japan",
+        "amountPlanned": 2800,
+        "amountActual": null,
+        "destinationId": "jp-sapporo",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "± €50 per dag."
+      },
+      {
+        "id": "b-eten-korea",
+        "categoryId": "cat-food",
+        "label": "Eten Korea",
+        "amountPlanned": 850,
+        "amountActual": null,
+        "destinationId": "kr-seoul",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-act-china",
+        "categoryId": "cat-activities",
+        "label": "Activiteiten China (Muur, panda's, parken)",
+        "amountPlanned": 400,
+        "amountActual": null,
+        "destinationId": "cn-beijing",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-act-zhangjiajie",
+        "categoryId": "cat-activities",
+        "label": "Zhangjiajie: entree & kabelbanen",
+        "amountPlanned": 120,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": "seg-zhangjiajie",
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Meerdaagse parkpas; voorbeeld van een post op segmentniveau."
+      },
+      {
+        "id": "b-act-taiwan",
+        "categoryId": "cat-activities",
+        "label": "Activiteiten Taiwan (Taroko, bronnen)",
+        "amountPlanned": 250,
+        "amountActual": null,
+        "destinationId": "tw-taipei",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-act-japan",
+        "categoryId": "cat-activities",
+        "label": "Activiteiten Japan (onsen, musea, kabelbanen)",
+        "amountPlanned": 700,
+        "amountActual": null,
+        "destinationId": "jp-sapporo",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-act-korea",
+        "categoryId": "cat-activities",
+        "label": "Activiteiten Korea (paleizen, parken)",
+        "amountPlanned": 300,
+        "amountActual": null,
+        "destinationId": "kr-seoul",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-fiets-huur",
+        "categoryId": "cat-bike",
+        "label": "Fietshuur Taiwan oostkust (2 fietsen, ± 10 dagen)",
+        "amountPlanned": 350,
+        "amountActual": null,
+        "destinationId": "tw-hualien",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Giant-verhuur met inleverpunt in andere stad."
+      },
+      {
+        "id": "b-fiets-jeju",
+        "categoryId": "cat-bike",
+        "label": "Fietshuur Jeju (rondje eiland)",
+        "amountPlanned": 120,
+        "amountActual": null,
+        "destinationId": "kr-jeju",
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-fiets-gear",
+        "categoryId": "cat-bike",
+        "label": "Fietstassen & kleine onderdelen",
+        "amountPlanned": 200,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Globale post."
+      },
+      {
+        "id": "b-visum-china",
+        "categoryId": "cat-visa",
+        "label": "Visum China (2 personen)",
+        "amountPlanned": 280,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Check actuele visumeisen ruim van tevoren."
+      },
+      {
+        "id": "b-keta",
+        "categoryId": "cat-visa",
+        "label": "K-ETA Zuid-Korea",
+        "amountPlanned": 20,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-verzekering",
+        "categoryId": "cat-visa",
+        "label": "Doorlopende reisverzekering (4 maanden, 2 personen)",
+        "amountPlanned": 500,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Globale post; telt mee in totaal zonder bestemming."
+      },
+      {
+        "id": "b-gear-tassen",
+        "categoryId": "cat-gear",
+        "label": "Backpacks & packing cubes",
+        "amountPlanned": 400,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-gear-kleding",
+        "categoryId": "cat-gear",
+        "label": "Kleding & schoenen vooraf",
+        "amountPlanned": 350,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": ""
+      },
+      {
+        "id": "b-buffer",
+        "categoryId": "cat-buffer",
+        "label": "Onvoorzien (± 10%)",
+        "amountPlanned": 2000,
+        "amountActual": null,
+        "destinationId": null,
+        "itinerarySegmentId": null,
+        "transportId": null,
+        "originalAmount": null,
+        "originalCurrency": null,
+        "notes": "Globale post."
+      }
+    ]
+  },
+  "packing": [
+    {
+      "id": "p-doc-paspoort",
+      "category": "Documenten",
+      "item": "Paspoorten (geldig tot minimaal maart 2028)",
+      "packed": false,
+      "notes": "Veel landen eisen 6 maanden geldigheid na vertrek."
+    },
+    {
+      "id": "p-doc-visum",
+      "category": "Documenten",
+      "item": "Visum China (print + digitaal)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-doc-verzekering",
+      "category": "Documenten",
+      "item": "Verzekeringspas & alarmnummers",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-doc-kopieen",
+      "category": "Documenten",
+      "item": "Kopieën documenten (cloud + papier)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-kleding-regenjas",
+      "category": "Kleding",
+      "item": "Regenjas",
+      "packed": false,
+      "notes": "Regenseizoen Taiwan en buien in de Japanse Alpen."
+    },
+    {
+      "id": "p-kleding-shirts",
+      "category": "Kleding",
+      "item": "Sneldrogende shirts (4 p.p.)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-kleding-fleece",
+      "category": "Kleding",
+      "item": "Fleece of warme laag",
+      "packed": false,
+      "notes": "Hokkaido-avonden en berghutten."
+    },
+    {
+      "id": "p-kleding-wandelschoenen",
+      "category": "Kleding",
+      "item": "Wandelschoenen (ingelopen)",
+      "packed": false,
+      "notes": "Zhangjiajie, Kamikochi, Seoraksan."
+    },
+    {
+      "id": "p-kleding-sandalen",
+      "category": "Kleding",
+      "item": "Sandalen",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-kleding-zonnehoed",
+      "category": "Kleding",
+      "item": "Zonnehoed of pet",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-fiets-short",
+      "category": "Fiets",
+      "item": "Fietsshorts met zeem (2 p.p.)",
+      "packed": false,
+      "notes": "Voor oostkust Taiwan en Jeju."
+    },
+    {
+      "id": "p-fiets-handschoenen",
+      "category": "Fiets",
+      "item": "Fietshandschoenen",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-fiets-bril",
+      "category": "Fiets",
+      "item": "Fietsbril (zon & insecten)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-elektronica-stekker",
+      "category": "Elektronica",
+      "item": "Wereldstekker (type A/C/F)",
+      "packed": false,
+      "notes": "China/Taiwan/Japan/Korea gebruiken verschillende stekkers."
+    },
+    {
+      "id": "p-elektronica-powerbank",
+      "category": "Elektronica",
+      "item": "Powerbank",
+      "packed": false,
+      "notes": "In handbagage, niet in ruim."
+    },
+    {
+      "id": "p-elektronica-laptop",
+      "category": "Elektronica",
+      "item": "Laptop (planning & back-ups)",
+      "packed": false,
+      "notes": "Wekelijks reisdocument exporteren."
+    },
+    {
+      "id": "p-elektronica-esim",
+      "category": "Elektronica",
+      "item": "eSIM's / data-abonnementen per land",
+      "packed": false,
+      "notes": "Vooraf regelen; China: check werkende VPN."
+    },
+    {
+      "id": "p-gezondheid-zonnebrand",
+      "category": "Gezondheid",
+      "item": "Zonnebrand (factor 50)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-gezondheid-deet",
+      "category": "Gezondheid",
+      "item": "Muggenspray (DEET)",
+      "packed": false,
+      "notes": "Vooral Taiwan en Zuid-Japan in de zomer."
+    },
+    {
+      "id": "p-gezondheid-ehbo",
+      "category": "Gezondheid",
+      "item": "EHBO-setje & blarenpleisters",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-gezondheid-medicijnen",
+      "category": "Gezondheid",
+      "item": "Medicijnen + recepten (Engels)",
+      "packed": false,
+      "notes": "Japan is streng op sommige middelen; vooraf checken."
+    },
+    {
+      "id": "p-overig-dagrugzak",
+      "category": "Overig",
+      "item": "Dagrugzak (opvouwbaar)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-overig-waterfles",
+      "category": "Overig",
+      "item": "Waterflessen (hervulbaar)",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-overig-handdoek",
+      "category": "Overig",
+      "item": "Sneldrogende handdoek",
+      "packed": false,
+      "notes": ""
+    },
+    {
+      "id": "p-overig-wasmiddel",
+      "category": "Overig",
+      "item": "Wasmiddel voor onderweg",
+      "packed": false,
+      "notes": "4 maanden = onderweg wassen."
+    },
+    {
+      "id": "p-overig-oordoppen",
+      "category": "Overig",
+      "item": "Slaapmasker & oordoppen",
+      "packed": false,
+      "notes": ""
+    }
+  ]
+}
