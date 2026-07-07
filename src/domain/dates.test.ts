@@ -3,6 +3,7 @@ import {
   addDays,
   diffDays,
   halfMonthForDate,
+  halfMonthsBetween,
   halfMonthsInRange,
   isValidISODate,
   tripWeekNumber,
@@ -65,6 +66,27 @@ describe("halfMonthsInRange", () => {
   it("kort verblijf binnen één helft levert één periode", () => {
     expect(halfMonthsInRange("2027-05-02", 3)).toEqual(["2027-05-H1"]);
     expect(halfMonthsInRange("2027-05-02", 0)).toEqual(["2027-05-H1"]);
+  });
+});
+
+describe("halfMonthsBetween", () => {
+  it("geeft beide helften van elke maand in het venster", () => {
+    expect(halfMonthsBetween("2027-05-10", "2027-06-01")).toEqual([
+      "2027-05-H1",
+      "2027-05-H2",
+      "2027-06-H1",
+      "2027-06-H2",
+    ]);
+  });
+
+  it("werkt binnen één maand en over een jaargrens", () => {
+    expect(halfMonthsBetween("2027-05-01", "2027-05-31")).toEqual(["2027-05-H1", "2027-05-H2"]);
+    expect(halfMonthsBetween("2027-12-15", "2028-01-10")).toEqual([
+      "2027-12-H1",
+      "2027-12-H2",
+      "2028-01-H1",
+      "2028-01-H2",
+    ]);
   });
 });
 

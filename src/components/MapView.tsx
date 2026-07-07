@@ -1,13 +1,34 @@
-import { useMemo } from "react";
-import { CircleMarker, MapContainer, Polyline, Popup, TileLayer } from "react-leaflet";
+import { useEffect, useMemo } from "react";
+import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
 import { latLngBounds } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import type { TripData } from "../hooks/useTripData";
+import { useUIStore } from "../state/ui";
 import { addDays, formatDayMonthNL } from "../domain/dates";
 import { STATUS_COLOR, StatusBadge } from "./shared";
 import { STATUSES } from "../domain/types";
 
+/**
+ * MapContainer-props gelden alleen bij initialisatie; dit child centreert de
+ * kaart opnieuw wanneer de bestemmingsset verandert (bijvoorbeeld na import).
+ */
+function FitBounds({ positions }: { positions: [number, number][] }) {
+  const map = useMap();
+  const key = positions.map((p) => p.join(",")).join(";");
+  useEffect(() => {
+    if (positions.length > 0) {
+      map.fitBounds(latLngBounds(positions), { padding: [40, 40] });
+    }
+    // `key` vat de posities samen; positions zelf krijgt elke render een
+    // nieuwe identiteit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, map]);
+  return null;
+}
+
 export function MapView({ data }: { data: TripData }) {
   const { destinations, segments } = data;
+  const { setTab, setEditingDestinationId } = useUIStore();
 
   const destinationById = useMemo(
     () => new Map(destinations.map((d) => [d.id, d])),
@@ -46,12 +67,14 @@ export function MapView({ data }: { data: TripData }) {
     );
   }
 
-  const bounds = latLngBounds(destinations.map((d) => [d.coords.lat, d.coords.lng]));
+  const positions = destinations.map((d): [number, number] => [d.coords.lat, d.coords.lng]);
+  const bounds = latLngBounds(positions);
 
   return (
     <div className="space-y-2">
       <div className="relative h-[70vh] overflow-hidden rounded-xl border border-slate-200 shadow-sm">
         <MapContainer bounds={bounds} boundsOptions={{ padding: [40, 40] }} scrollWheelZoom>
+          <FitBounds positions={positions} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bijdragers'
             url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -91,6 +114,16 @@ export function MapView({ data }: { data: TripData }) {
                     </p>
                   ))}
                   {dest.notes && <p className="text-xs text-slate-500">{dest.notes}</p>}
+                  <button
+                    type="button"
+                    className="mt-1 rounded border border-slate-300 px-2 py-0.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      setTab("bestemmingen");
+                      setEditingDestinationId(dest.id);
+                    }}
+                  >
+                    Bewerken
+                  </button>
                 </div>
               </Popup>
             </CircleMarker>

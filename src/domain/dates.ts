@@ -60,6 +60,26 @@ export function halfMonthsInRange(startIso: string, nights: number): string[] {
   return result;
 }
 
+/**
+ * Beide helften van elke maand van de maand van `startIso` tot en met de
+ * maand van `endIso` — de keuzelijst voor seizoensperiodes.
+ */
+export function halfMonthsBetween(startIso: string, endIso: string): string[] {
+  const result: string[] = [];
+  let [year, month] = startIso.split("-").map(Number);
+  const [endYear, endMonth] = endIso.split("-").map(Number);
+  while (year < endYear || (year === endYear && month <= endMonth)) {
+    const prefix = `${year}-${String(month).padStart(2, "0")}`;
+    result.push(`${prefix}-H1`, `${prefix}-H2`);
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+  return result;
+}
+
 const NL_WEEKDAY_DATE = new Intl.DateTimeFormat("nl-NL", {
   weekday: "short",
   day: "numeric",

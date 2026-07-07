@@ -4,11 +4,12 @@
  */
 import { create } from "zustand";
 
-export type Tab = "planning" | "kaart" | "budget" | "paklijst" | "data";
+export type Tab = "planning" | "kaart" | "bestemmingen" | "budget" | "paklijst" | "data";
 
 export const TABS: { id: Tab; label: string }[] = [
   { id: "planning", label: "Planning" },
   { id: "kaart", label: "Kaart" },
+  { id: "bestemmingen", label: "Bestemmingen" },
   { id: "budget", label: "Budget" },
   { id: "paklijst", label: "Paklijst" },
   { id: "data", label: "Back-up & data" },
@@ -24,6 +25,8 @@ type UIState = {
   setEditingSegmentId: (id: EditorTarget) => void;
   editingBudgetItemId: EditorTarget;
   setEditingBudgetItemId: (id: EditorTarget) => void;
+  editingDestinationId: EditorTarget;
+  setEditingDestinationId: (id: EditorTarget) => void;
 };
 
 export const useUIStore = create<UIState>((set) => ({
@@ -33,4 +36,6 @@ export const useUIStore = create<UIState>((set) => ({
   setEditingSegmentId: (editingSegmentId) => set({ editingSegmentId }),
   editingBudgetItemId: null,
   setEditingBudgetItemId: (editingBudgetItemId) => set({ editingBudgetItemId }),
+  editingDestinationId: null,
+  setEditingDestinationId: (editingDestinationId) => set({ editingDestinationId }),
 }));

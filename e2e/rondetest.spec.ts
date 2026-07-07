@@ -69,6 +69,83 @@ test("corrupte JSON wordt geweigerd en de bestaande reis blijft intact", async (
   await expect(page.getByText("126 / 126")).toBeVisible();
 });
 
+test("een te groot bestand wordt geweigerd zonder het in te lezen", async ({ page }) => {
+  await openFreshApp(page);
+
+  const bigPath = test.info().outputPath("veel-te-groot.json");
+  fs.writeFileSync(bigPath, Buffer.alloc(11 * 1024 * 1024, 0x20)); // 11 MB spaties
+
+  await page.getByRole("button", { name: "Back-up & data" }).click();
+  await page.locator('input[type="file"]').setInputFiles(bigPath);
+
+  await expect(page.getByText(/begrensd op 10 MB/)).toBeVisible();
+
+  // Reis is onaangetast.
+  await page.getByRole("button", { name: "Planning" }).click();
+  await expect(page.getByText("126 / 126")).toBeVisible();
+});
+
+test("kaart centreert op de bestemmingen van een geimporteerde reis", async ({ page }) => {
+  await openFreshApp(page);
+
+  // Mini-reis aan de andere kant van de wereld: zonder hercentrering blijft
+  // de kaart op Oost-Azie staan en valt deze marker buiten beeld.
+  const doc = {
+    meta: {
+      id: "trip-ijsland",
+      title: "IJsland test",
+      startDate: "2027-05-10",
+      endDate: "2027-05-17",
+      durationWeeks: 1,
+      currency: "EUR",
+      schemaVersion: 1,
+    },
+    destinations: [
+      {
+        id: "is-reykjavik",
+        name: "Reykjavik",
+        country: "IJsland",
+        coords: { lat: 64.1466, lng: -21.9426 },
+        activities: ["stad"],
+        status: "vast",
+        seasonal: [],
+        notes: "",
+      },
+    ],
+    itinerary: [
+      {
+        id: "seg-rvk",
+        destinationId: "is-reykjavik",
+        startDate: "2027-05-10",
+        nights: 7,
+        status: "vast",
+        notes: "",
+      },
+    ],
+    transport: [],
+    budget: { categories: [], items: [] },
+    packing: [],
+  };
+  const docPath = test.info().outputPath("ijsland.json");
+  fs.writeFileSync(docPath, JSON.stringify(doc));
+
+  await page.getByRole("button", { name: "Back-up & data" }).click();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.locator('input[type="file"]').setInputFiles(docPath);
+  await expect(page.getByRole("heading", { name: "IJsland test" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Kaart" }).click();
+  const marker = page.locator("path.leaflet-interactive").first();
+  await expect(marker).toBeVisible();
+
+  const viewport = page.viewportSize()!;
+  const box = (await marker.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+});
+
 test("JSON met kapotte referentie wordt geweigerd met een duidelijke fout", async ({ page }) => {
   await openFreshApp(page);
 
