@@ -70,6 +70,8 @@ src/
 e2e/         Playwright-rondetest (export → wissen → import zonder dataverlies)
 ```
 
+Wijzigingen per versie staan in [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Deploy (GitHub Pages)
 
 De workflow `.github/workflows/deploy.yml` bouwt en publiceert naar GitHub Pages bij
