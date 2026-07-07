@@ -1,23 +1,21 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { BackupView, ImportPanel, useExportAction } from "./components/BackupView";
+import { BudgetView } from "./components/BudgetView";
+import { DestinationsView } from "./components/DestinationsView";
+import { PackingView } from "./components/PackingView";
+import { PlanningView } from "./components/PlanningView";
+import { primaryButton } from "./components/shared";
 import { db } from "./db/db";
 import { loadSeedIfEmpty } from "./db/seed";
-import { useTripData } from "./hooks/useTripData";
-import type { TripRecord } from "./domain/types";
-import { TABS, useUIStore } from "./state/ui";
 import { formatDateFullNL } from "./domain/dates";
 import { formatTimestampNL } from "./domain/format";
-import { PlanningView } from "./components/PlanningView";
-import { DestinationsView } from "./components/DestinationsView";
-import { BudgetView } from "./components/BudgetView";
-import { PackingView } from "./components/PackingView";
-import { DataView, ImportPanel, useExportAction } from "./components/DataView";
-import { primaryButton } from "./components/shared";
+import type { TripRecord } from "./domain/types";
+import { useTripData } from "./hooks/useTripData";
+import { TABS, useUIStore } from "./state/ui";
 
 // Leaflet is het grootste stuk van de bundel en alleen nodig op het
 // kaart-tabblad; lazy laden houdt de eerste load klein.
-const MapView = lazy(() =>
-  import("./components/MapView").then((m) => ({ default: m.MapView })),
-);
+const MapView = lazy(() => import("./components/MapView").then((m) => ({ default: m.MapView })));
 
 export default function App() {
   const [seedError, setSeedError] = useState<string | null>(null);
@@ -75,16 +73,14 @@ export default function App() {
           <>
             {tab === "planning" && <PlanningView data={data} trip={trip} />}
             {tab === "kaart" && (
-              <Suspense
-                fallback={<p className="p-4 text-sm text-slate-500">Kaart laden…</p>}
-              >
+              <Suspense fallback={<p className="p-4 text-sm text-slate-500">Kaart laden…</p>}>
                 <MapView data={data} />
               </Suspense>
             )}
             {tab === "bestemmingen" && <DestinationsView data={data} trip={trip} />}
             {tab === "budget" && <BudgetView data={data} trip={trip} />}
             {tab === "paklijst" && <PackingView data={data} trip={trip} />}
-            {tab === "data" && <DataView data={data} trip={trip} />}
+            {tab === "data" && <BackupView data={data} trip={trip} />}
           </>
         )}
       </main>
@@ -99,9 +95,7 @@ function Header({ trip }: { trip: TripRecord | null }) {
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">
-            {trip ? trip.title : "Reisplanner"}
-          </h1>
+          <h1 className="text-xl font-bold text-slate-900">{trip ? trip.title : "Reisplanner"}</h1>
           {trip && (
             <p className="text-sm text-slate-500">
               {formatDateFullNL(trip.startDate)} – {formatDateFullNL(trip.endDate)} ·{" "}

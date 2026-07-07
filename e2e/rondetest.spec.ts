@@ -3,8 +3,9 @@
  * seed → export → alle lokale data wissen → import → zelfde reis terug,
  * en een tweede export die byte-gelijk is aan de eerste.
  */
-import { expect, test, type Page } from "@playwright/test";
+
 import fs from "node:fs";
+import { expect, type Page, test } from "@playwright/test";
 
 // Elke Playwright-test krijgt een verse browsercontext (schone IndexedDB),
 // dus de app laadt hier altijd de seed.

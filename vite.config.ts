@@ -1,7 +1,8 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 // base "./" maakt de build pad-onafhankelijk, zodat dezelfde bundel
 // zowel lokaal als op GitHub Pages (onder /reisplanner/) werkt.

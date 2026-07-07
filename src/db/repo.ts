@@ -5,7 +5,6 @@
  * achterlaat.
  */
 import type { ZodType } from "zod";
-import type { ReisplannerDB } from "./db";
 import type { TripDocument } from "../domain/schema";
 import {
   budgetItemSchema,
@@ -14,7 +13,6 @@ import {
   packingItemSchema,
   parseTripDocument,
 } from "../domain/schema";
-import { documentToRecords, recordsToDocument, serializeDocument } from "./mapping";
 import type {
   BudgetItemRecord,
   DestinationRecord,
@@ -22,6 +20,8 @@ import type {
   PackingItemRecord,
   TripRecord,
 } from "../domain/types";
+import type { ReisplannerDB } from "./db";
+import { documentToRecords, recordsToDocument, serializeDocument } from "./mapping";
 
 function now(): string {
   return new Date().toISOString();
@@ -93,7 +93,10 @@ export async function importDocument(db: ReisplannerDB, doc: TripDocument): Prom
  * wordt vóór teruggave nogmaals tegen het schema gevalideerd: een export die
  * niet aan het eigen contract voldoet, mag de app niet verlaten.
  */
-export async function buildExportDocument(db: ReisplannerDB, tripId: string): Promise<TripDocument> {
+export async function buildExportDocument(
+  db: ReisplannerDB,
+  tripId: string,
+): Promise<TripDocument> {
   const doc = await db.transaction("r", [...ALL_TABLES], async () => {
     const trip = await db.trips.get(tripId);
     if (!trip) throw new Error(`Reis "${tripId}" bestaat niet.`);
@@ -239,7 +242,11 @@ export type SegmentInput = {
   notes: string;
 };
 
-export async function addSegment(db: ReisplannerDB, tripId: string, input: SegmentInput): Promise<string> {
+export async function addSegment(
+  db: ReisplannerDB,
+  tripId: string,
+  input: SegmentInput,
+): Promise<string> {
   const valid = validateInput(segmentInputSchema, input, "verblijf");
   const id = newId();
   await db.transaction("rw", db.itinerarySegments, db.trips, async () => {
@@ -266,7 +273,11 @@ export async function updateSegment(
  * Verwijdert een segment en koppelt budgetitems die ernaar verwijzen los
  * (itinerarySegmentId → null), zodat er nooit kapotte referenties ontstaan.
  */
-export async function deleteSegment(db: ReisplannerDB, tripId: string, segmentId: string): Promise<void> {
+export async function deleteSegment(
+  db: ReisplannerDB,
+  tripId: string,
+  segmentId: string,
+): Promise<void> {
   await db.transaction("rw", db.itinerarySegments, db.budgetItems, db.trips, async () => {
     await db.budgetItems
       .where("itinerarySegmentId")
@@ -283,7 +294,11 @@ export async function deleteSegment(db: ReisplannerDB, tripId: string, segmentId
 
 export type BudgetItemInput = Omit<BudgetItemRecord, "id" | "tripId">;
 
-export async function addBudgetItem(db: ReisplannerDB, tripId: string, input: BudgetItemInput): Promise<string> {
+export async function addBudgetItem(
+  db: ReisplannerDB,
+  tripId: string,
+  input: BudgetItemInput,
+): Promise<string> {
   const valid = validateInput(budgetItemInputSchema, input, "budgetpost");
   const id = newId();
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
@@ -306,7 +321,11 @@ export async function updateBudgetItem(
   });
 }
 
-export async function deleteBudgetItem(db: ReisplannerDB, tripId: string, itemId: string): Promise<void> {
+export async function deleteBudgetItem(
+  db: ReisplannerDB,
+  tripId: string,
+  itemId: string,
+): Promise<void> {
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
     await db.budgetItems.delete(itemId);
     await touchTrip(db, tripId);
@@ -343,7 +362,11 @@ export async function setPackingItemPacked(
   });
 }
 
-export async function deletePackingItem(db: ReisplannerDB, tripId: string, itemId: string): Promise<void> {
+export async function deletePackingItem(
+  db: ReisplannerDB,
+  tripId: string,
+  itemId: string,
+): Promise<void> {
   await db.transaction("rw", db.packingItems, db.trips, async () => {
     await db.packingItems.delete(itemId);
     await touchTrip(db, tripId);

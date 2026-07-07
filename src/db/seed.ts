@@ -1,5 +1,5 @@
-import seedJson from "../seed/oost-azie-2027.json";
 import { parseTripDocument, type TripDocument } from "../domain/schema";
+import seedJson from "../seed/oost-azie-2027.json";
 import type { ReisplannerDB } from "./db";
 import { importDocument } from "./repo";
 

@@ -73,7 +73,9 @@ export function countryForItem(
     if (!leg) return null;
     const arrival = leg.toDestinationId ? destinationById.get(leg.toDestinationId) : undefined;
     if (arrival) return arrival.country;
-    const departure = leg.fromDestinationId ? destinationById.get(leg.fromDestinationId) : undefined;
+    const departure = leg.fromDestinationId
+      ? destinationById.get(leg.fromDestinationId)
+      : undefined;
     return departure?.country ?? null;
   }
   return null;

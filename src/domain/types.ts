@@ -7,14 +7,7 @@ export const STATUSES = ["vast", "kandidaat", "idee"] as const;
 export type Status = (typeof STATUSES)[number];
 
 /** Gestandaardiseerde hazard-labels (startset, uitbreidbaar in code). */
-export const HAZARDS = [
-  "regen",
-  "hitte",
-  "tyfoon",
-  "kou",
-  "drukte",
-  "hoogseizoen",
-] as const;
+export const HAZARDS = ["regen", "hitte", "tyfoon", "kou", "drukte", "hoogseizoen"] as const;
 export type Hazard = (typeof HAZARDS)[number];
 
 export const TRANSPORT_MODES = [
