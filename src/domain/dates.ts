@@ -9,11 +9,7 @@ export function isValidISODate(iso: string): boolean {
   if (!ISO_DATE_RE.test(iso)) return false;
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
-  return (
-    date.getUTCFullYear() === y &&
-    date.getUTCMonth() === m - 1 &&
-    date.getUTCDate() === d
-  );
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
 }
 
 export function parseISODate(iso: string): Date {

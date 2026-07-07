@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { db } from "../db/db";
-import type { TripData } from "../hooks/useTripData";
-import type { PackingItemRecord, TripRecord } from "../domain/types";
 import { addPackingItem, deletePackingItem, setPackingItemPacked } from "../db/repo";
-import { SectionCard, inputClass, primaryButton } from "./shared";
+import type { PackingItemRecord, TripRecord } from "../domain/types";
+import type { TripData } from "../hooks/useTripData";
+import { inputClass, primaryButton, SectionCard } from "./shared";
 
 export function PackingView({ data, trip }: { data: TripData; trip: TripRecord }) {
   const { packingItems } = data;
@@ -102,7 +102,10 @@ export function PackingView({ data, trip }: { data: TripData; trip: TripRecord }
       <SectionCard title="Item toevoegen">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-44">
-            <label className="mb-1 block text-xs font-medium text-slate-600" htmlFor="pack-category">
+            <label
+              className="mb-1 block text-xs font-medium text-slate-600"
+              htmlFor="pack-category"
+            >
               Categorie
             </label>
             <input

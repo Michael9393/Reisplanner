@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { db } from "../db/db";
-import type { TripData } from "../hooks/useTripData";
-import { useUIStore } from "../state/ui";
+import { addSegment, deleteSegment, type SegmentInput, updateSegment } from "../db/repo";
+import { addDays, diffDays, formatDateNL, formatDayMonthNL, tripWeekNumber } from "../domain/dates";
+import { formatEuro } from "../domain/format";
+import { assessSeason, hasSeasonWarning } from "../domain/season";
 import type {
   DestinationRecord,
   ItinerarySegmentRecord,
@@ -9,19 +11,17 @@ import type {
   TripRecord,
 } from "../domain/types";
 import { STATUSES } from "../domain/types";
-import { addDays, diffDays, formatDateNL, formatDayMonthNL, tripWeekNumber } from "../domain/dates";
-import { assessSeason, hasSeasonWarning } from "../domain/season";
-import { formatEuro } from "../domain/format";
-import { addSegment, deleteSegment, updateSegment, type SegmentInput } from "../db/repo";
+import type { TripData } from "../hooks/useTripData";
+import { useUIStore } from "../state/ui";
 import {
-  Modal,
-  MODE_ICON,
-  SeasonSummary,
-  StatusBadge,
   dangerButton,
   inputClass,
   labelClass,
+  MODE_ICON,
+  Modal,
   primaryButton,
+  SeasonSummary,
+  StatusBadge,
   secondaryButton,
 } from "./shared";
 
@@ -41,7 +41,11 @@ export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord 
   const timeline = useMemo<TimelineEntry[]>(() => {
     const entries: TimelineEntry[] = [
       ...transport.map((leg) => ({ kind: "transport" as const, date: leg.date, leg })),
-      ...segments.map((segment) => ({ kind: "segment" as const, date: segment.startDate, segment })),
+      ...segments.map((segment) => ({
+        kind: "segment" as const,
+        date: segment.startDate,
+        segment,
+      })),
     ];
     // Op dezelfde dag eerst het transport, dan het verblijf.
     const kindOrder = { transport: 0, segment: 1 } as const;
@@ -304,7 +308,11 @@ function SegmentEditor({
 
   async function remove() {
     if (!segment) return;
-    if (!window.confirm("Dit verblijf verwijderen? Gekoppelde budgetposten blijven bestaan als globale post.")) {
+    if (
+      !window.confirm(
+        "Dit verblijf verwijderen? Gekoppelde budgetposten blijven bestaan als globale post.",
+      )
+    ) {
       return;
     }
     await deleteSegment(db, trip.id, segment.id);

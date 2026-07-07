@@ -3,7 +3,7 @@
  * verwijder-blokkade zolang er verblijven naar verwijzen.
  * (ASCII-testtitels: Chromium weigert stilletjes unicode-paden bij setInputFiles.)
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 async function openFreshApp(page: Page) {
   await page.goto("/");

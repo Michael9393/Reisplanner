@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  GLOBAL_BUCKET,
+  type BudgetContext,
   countryForItem,
+  GLOBAL_BUCKET,
   totalsByCategory,
   totalsByCountry,
   totalsBySegment,
   totalsOverall,
-  type BudgetContext,
 } from "./budget";
 import type { BudgetItemRecord } from "./types";
 
@@ -97,7 +97,13 @@ function fixture(): BudgetContext {
     ],
     items: [
       item({ id: "b1", amountPlanned: 100, destinationId: "d-cn" }),
-      item({ id: "b2", amountPlanned: 200, amountActual: 180, itinerarySegmentId: "s1", categoryId: "c2" }),
+      item({
+        id: "b2",
+        amountPlanned: 200,
+        amountActual: 180,
+        itinerarySegmentId: "s1",
+        categoryId: "c2",
+      }),
       item({ id: "b3", amountPlanned: 300, transportId: "t1" }),
       item({ id: "b4", amountPlanned: 400 }), // globale post
       item({ id: "b5", amountPlanned: 50, transportId: "t2" }), // transport zonder aankomst → land van vertrek

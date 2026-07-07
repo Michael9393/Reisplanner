@@ -2,8 +2,9 @@
  * Seizoensbeoordeling van een verblijf: welke halve maanden raakt een segment
  * en wat zeggen de seizoensdata van de bestemming daarover.
  */
-import type { DestinationRecord, Hazard, SeasonalPeriod } from "./types";
+
 import { halfMonthsInRange } from "./dates";
+import type { DestinationRecord, Hazard, SeasonalPeriod } from "./types";
 
 export type SeasonLevel = "goed" | "matig" | "slecht" | "onbekend";
 
@@ -27,9 +28,7 @@ export function assessSeason(
     .filter((entry) => window.has(entry.period))
     .sort((a, b) => a.period.localeCompare(b.period));
 
-  const minRating = periods.length
-    ? Math.min(...periods.map((entry) => entry.rating))
-    : null;
+  const minRating = periods.length ? Math.min(...periods.map((entry) => entry.rating)) : null;
   const hazards = [...new Set(periods.flatMap((entry) => entry.hazards))];
 
   let level: SeasonLevel;

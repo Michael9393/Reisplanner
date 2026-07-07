@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import { db } from "../db/db";
-import type { TripData } from "../hooks/useTripData";
-import { useUIStore } from "../state/ui";
+import {
+  addDestination,
+  type DestinationInput,
+  deleteDestination,
+  updateDestination,
+} from "../db/repo";
+import { addDays, formatHalfMonthNL, halfMonthsBetween } from "../domain/dates";
+import { countriesInTripOrder } from "../domain/itinerary";
 import type {
   DestinationRecord,
   Hazard,
@@ -10,21 +16,15 @@ import type {
   TripRecord,
 } from "../domain/types";
 import { HAZARDS, STATUSES } from "../domain/types";
-import { addDays, formatHalfMonthNL, halfMonthsBetween } from "../domain/dates";
-import { countriesInTripOrder } from "../domain/itinerary";
+import type { TripData } from "../hooks/useTripData";
+import { useUIStore } from "../state/ui";
 import {
-  addDestination,
-  deleteDestination,
-  updateDestination,
-  type DestinationInput,
-} from "../db/repo";
-import {
-  Modal,
-  StatusBadge,
   dangerButton,
   inputClass,
   labelClass,
+  Modal,
   primaryButton,
+  StatusBadge,
   secondaryButton,
 } from "./shared";
 
@@ -60,9 +60,7 @@ export function DestinationsView({ data, trip }: { data: TripData; trip: TripRec
       .filter((country) => byCountry.has(country))
       .map((country) => ({
         country,
-        destinations: byCountry
-          .get(country)!
-          .sort((a, b) => a.name.localeCompare(b.name, "nl")),
+        destinations: byCountry.get(country)!.sort((a, b) => a.name.localeCompare(b.name, "nl")),
       }));
   }, [destinations, segments]);
 
@@ -78,8 +76,8 @@ export function DestinationsView({ data, trip }: { data: TripData; trip: TripRec
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <p className="text-sm text-slate-600">
-          {destinations.length} bestemmingen · wijzigingen werken direct door in planning,
-          kaart en budget
+          {destinations.length} bestemmingen · wijzigingen werken direct door in planning, kaart en
+          budget
         </p>
         <button
           type="button"
@@ -91,7 +89,10 @@ export function DestinationsView({ data, trip }: { data: TripData; trip: TripRec
       </div>
 
       {groups.map(({ country, destinations: list }) => (
-        <section key={country} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section
+          key={country}
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+        >
           <h2 className="mb-2 text-base font-semibold text-slate-800">{country}</h2>
           <ul className="divide-y divide-slate-100">
             {list.map((dest) => (
@@ -113,7 +114,9 @@ export function DestinationsView({ data, trip }: { data: TripData; trip: TripRec
                       <p className="text-xs text-slate-500">{dest.activities.join(" · ")}</p>
                     )}
                     {dest.notes && (
-                      <p className="mt-0.5 max-w-xl truncate text-xs text-slate-400">{dest.notes}</p>
+                      <p className="mt-0.5 max-w-xl truncate text-xs text-slate-400">
+                        {dest.notes}
+                      </p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -168,6 +171,9 @@ export function DestinationsView({ data, trip }: { data: TripData; trip: TripRec
 
 const COORD_PAIR = /^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/;
 
+/** Editor-rij met een stabiele React-key, los van de (bewerkbare) periode. */
+type SeasonalRow = SeasonalPeriod & { rowId: string };
+
 function DestinationEditor({
   trip,
   destination,
@@ -188,8 +194,14 @@ function DestinationEditor({
   const [activities, setActivities] = useState(destination?.activities.join(", ") ?? "");
   const [status, setStatus] = useState<Status>(destination?.status ?? "kandidaat");
   const [notes, setNotes] = useState(destination?.notes ?? "");
-  const [seasonal, setSeasonal] = useState<SeasonalPeriod[]>(
-    destination ? destination.seasonal.map((s) => ({ ...s, hazards: [...s.hazards] })) : [],
+  const [seasonal, setSeasonal] = useState<SeasonalRow[]>(
+    destination
+      ? destination.seasonal.map((s) => ({
+          ...s,
+          hazards: [...s.hazards],
+          rowId: crypto.randomUUID(),
+        }))
+      : [],
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -215,9 +227,7 @@ function DestinationEditor({
         const active = entry.hazards.includes(hazard);
         return {
           ...entry,
-          hazards: active
-            ? entry.hazards.filter((h) => h !== hazard)
-            : [...entry.hazards, hazard],
+          hazards: active ? entry.hazards.filter((h) => h !== hazard) : [...entry.hazards, hazard],
         };
       }),
     );
@@ -228,7 +238,7 @@ function DestinationEditor({
     const next = periodOptions.find((period) => !used.has(period)) ?? periodOptions[0];
     setSeasonal((current) => [
       ...current,
-      { period: next, rating: 3, hazards: [], note: "" },
+      { period: next, rating: 3, hazards: [], note: "", rowId: crypto.randomUUID() },
     ]);
   }
 
@@ -248,8 +258,15 @@ function DestinationEditor({
     const lngNum = Number(lng);
     if (name.trim() === "") return setError("Geef de bestemming een naam.");
     if (country.trim() === "") return setError("Vul een land in.");
-    if (lat.trim() === "" || lng.trim() === "" || !Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
-      return setError("Coördinaten zijn verplicht en moeten getallen zijn (met een punt als decimaalteken).");
+    if (
+      lat.trim() === "" ||
+      lng.trim() === "" ||
+      !Number.isFinite(latNum) ||
+      !Number.isFinite(lngNum)
+    ) {
+      return setError(
+        "Coördinaten zijn verplicht en moeten getallen zijn (met een punt als decimaalteken).",
+      );
     }
     if (Math.abs(latNum) > 90 || Math.abs(lngNum) > 180) {
       return setError("Breedtegraad moet tussen -90 en 90 liggen, lengtegraad tussen -180 en 180.");
@@ -268,7 +285,9 @@ function DestinationEditor({
         .map((a) => a.trim())
         .filter(Boolean),
       status,
-      seasonal: [...seasonal].sort((a, b) => a.period.localeCompare(b.period)),
+      seasonal: seasonal
+        .map(({ rowId: _rowId, ...entry }) => entry)
+        .sort((a, b) => a.period.localeCompare(b.period)),
       notes,
     };
     try {
@@ -301,10 +320,7 @@ function DestinationEditor({
   }
 
   return (
-    <Modal
-      title={destination ? "Bestemming bewerken" : "Nieuwe bestemming"}
-      onClose={onClose}
-    >
+    <Modal title={destination ? "Bestemming bewerken" : "Nieuwe bestemming"} onClose={onClose}>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -427,7 +443,7 @@ function DestinationEditor({
           </div>
           <div className="space-y-2">
             {seasonal.map((entry, index) => (
-              <div key={index} className="rounded-lg border border-slate-200 bg-white p-2">
+              <div key={entry.rowId} className="rounded-lg border border-slate-200 bg-white p-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <select
                     aria-label="Periode"
@@ -455,9 +471,7 @@ function DestinationEditor({
                   </select>
                   <button
                     type="button"
-                    onClick={() =>
-                      setSeasonal((current) => current.filter((_, i) => i !== index))
-                    }
+                    onClick={() => setSeasonal((current) => current.filter((_, i) => i !== index))}
                     className="ml-auto rounded p-1 text-slate-400 hover:text-red-500"
                     aria-label="Periode verwijderen"
                   >
