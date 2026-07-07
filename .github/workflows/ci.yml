@@ -9,8 +9,12 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  kwaliteit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx biome ci .
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -32,8 +37,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Bepaal Playwright-versie
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ steps.pw.outputs.version }}
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
+      - run: npm run e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

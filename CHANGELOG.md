@@ -11,6 +11,11 @@ krijgt die sectie een versienummer en datum.
 
 ### Toegevoegd
 
+- Ontwikkel-tooling: Biome als linter/formatter (met `npm run verify` als ene
+  controlepoort), pre-commit hook via husky + lint-staged, coverage-script,
+  typecheck voor de e2e-laag, CI met lint-stap en Playwright-browsercache,
+  maandelijkse Dependabot-updates en een PR-template met kwaliteitschecklist.
+
 - Tabblad **Bestemmingen**: bestemmingen toevoegen, bewerken en verwijderen in de
   UI, inclusief een editor voor seizoensdata per halve maand (rating 1–5,
   hazard-toggles, notitie). Een geplakt "lat, lng"-paar splitst automatisch over

@@ -11,13 +11,19 @@ en changelog-entries.
 ## Commands
 
 ```bash
+npm run verify       # dé poort vóór elke commit/PR: typecheck + lint + tests + build
 npm run dev          # ontwikkelserver
 npm run build        # typecheck + productie-build
-npm run typecheck    # alleen tsc -b
-npm test             # unit tests (Vitest); test:watch voor watch-modus
-npx playwright test  # e2e (eerst: npx playwright install chromium,
+npm run typecheck    # tsc -b (dekt src, e2e én playwright.config)
+npm run lint         # Biome: lint + format-check + importvolgorde
+npm run lint:fix     # idem, met fixes
+npm test             # unit tests (Vitest); test:watch / test:coverage
+npm run e2e          # Playwright (eerst: npx playwright install chromium,
                      #  of PW_CHROMIUM=/pad/naar/chromium bij een voorgeïnstalleerde browser)
 ```
+
+Een pre-commit hook (husky + lint-staged) draait Biome met fixes op de
+gewijzigde bestanden; CI draait het volledige verify-pad plus de e2e-suite.
 
 ## Architectuur
 
@@ -55,6 +61,9 @@ npx playwright test  # e2e (eerst: npx playwright install chromium,
   nieuwe externe bron vereist een bewuste CSP-aanpassing.
 - Leaflet wordt lazy geladen (`MapView` via `React.lazy`); importeer Leaflet
   niet in eagerly geladen modules.
+- **Biome formatteert alles behalve `src/seed/oost-azie-2027.json`**: dat
+  bestand is een letterlijk export-artefact en moet byte-voor-byte het
+  uitvoerformaat van `serializeDocument` houden.
 
 ## Workflow
 
