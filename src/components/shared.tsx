@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { Hazard, Status, TransportMode } from "../domain/types";
 import type { SeasonAssessment } from "../domain/season";
 import { hasSeasonWarning } from "../domain/season";
@@ -95,6 +95,9 @@ export function SeasonSummary({ assessment }: { assessment: SeasonAssessment }) 
   );
 }
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Modal({
   title,
   onClose,
@@ -104,14 +107,64 @@ export function Modal({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  // De backdrop sluit alleen als de klik daar ook begón; een selectie-drag
+  // die buiten de modal eindigt mag geen invoer laten verdwijnen.
+  const mouseDownOnBackdrop = useRef(false);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const firstField = panel.querySelector<HTMLElement>(FOCUSABLE);
+    (firstField ?? panel).focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab" || !panel) return;
+      // Eenvoudige focus trap: Tab cirkelt binnen de modal.
+      const focusable = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:items-center"
-      onClick={onClose}
+      onMouseDown={(event) => {
+        mouseDownOnBackdrop.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget && mouseDownOnBackdrop.current) onClose();
+      }}
     >
       <div
-        className="w-full max-w-lg rounded-xl bg-white p-5 shadow-xl"
-        onClick={(event) => event.stopPropagation()}
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        className="w-full max-w-lg rounded-xl bg-white p-5 shadow-xl outline-none"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-800">{title}</h2>

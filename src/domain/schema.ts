@@ -11,6 +11,13 @@ import { isValidISODate } from "./dates";
 
 export const SCHEMA_VERSION = 1;
 
+/** Bovengrens voor importbestanden; een reisdocument is ~100 KB. */
+export const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
+
+// Ruime bovengrenzen: legitiem gebruik raakt ze nooit, maar een corrupt of
+// kwaadaardig bestand kan de browser niet meer vastzetten met extreme data.
+const MAX_COLLECTION = 2000;
+
 // Nederlandse foutmeldingen voor alle standaard Zod-validaties.
 z.config(z.locales.nl());
 
@@ -24,83 +31,86 @@ const halfMonth = z
     error: "moet een halve maand zijn in het formaat YYYY-MM-H1 of YYYY-MM-H2",
   });
 
-const id = z.string().min(1);
+const id = z.string().min(1).max(200);
+const shortText = z.string().min(1).max(200);
+const notesText = z.string().max(5000);
+const amount = z.number().min(0).max(100_000_000);
 
-export const seasonalPeriodSchema = z.object({
+export const seasonalPeriodSchema = z.strictObject({
   period: halfMonth,
   rating: z.number().int().min(1).max(5),
-  hazards: z.array(z.enum(HAZARDS)),
-  note: z.string(),
+  hazards: z.array(z.enum(HAZARDS)).max(20),
+  note: notesText,
 });
 
-export const destinationSchema = z.object({
+export const destinationSchema = z.strictObject({
   id,
-  name: z.string().min(1),
-  country: z.string().min(1),
-  coords: z.object({
+  name: shortText,
+  country: shortText,
+  coords: z.strictObject({
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
   }),
-  activities: z.array(z.string()),
+  activities: z.array(z.string().max(200)).max(100),
   status: z.enum(STATUSES),
-  seasonal: z.array(seasonalPeriodSchema),
-  notes: z.string(),
+  seasonal: z.array(seasonalPeriodSchema).max(200),
+  notes: notesText,
 });
 
-export const itinerarySegmentSchema = z.object({
+export const itinerarySegmentSchema = z.strictObject({
   id,
   destinationId: id,
   startDate: isoDate,
-  nights: z.number().int().min(0),
+  nights: z.number().int().min(0).max(1000),
   status: z.enum(STATUSES),
-  notes: z.string(),
+  notes: notesText,
 });
 
-export const transportLegSchema = z.object({
+export const transportLegSchema = z.strictObject({
   id,
   fromDestinationId: id.nullable(),
   toDestinationId: id.nullable(),
   date: isoDate,
   mode: z.enum(TRANSPORT_MODES),
-  label: z.string().min(1),
-  estimatedCost: z.number().min(0).nullable(),
-  notes: z.string(),
+  label: shortText,
+  estimatedCost: amount.nullable(),
+  notes: notesText,
 });
 
-export const budgetCategorySchema = z.object({
+export const budgetCategorySchema = z.strictObject({
   id,
-  label: z.string().min(1),
+  label: shortText,
 });
 
-export const budgetItemSchema = z.object({
+export const budgetItemSchema = z.strictObject({
   id,
   categoryId: id,
-  label: z.string().min(1),
-  amountPlanned: z.number().min(0),
-  amountActual: z.number().min(0).nullable(),
+  label: shortText,
+  amountPlanned: amount,
+  amountActual: amount.nullable(),
   destinationId: id.nullable(),
   itinerarySegmentId: id.nullable(),
   transportId: id.nullable(),
-  originalAmount: z.number().min(0).nullable(),
-  originalCurrency: z.string().min(1).nullable(),
-  notes: z.string(),
+  originalAmount: amount.nullable(),
+  originalCurrency: z.string().min(1).max(10).nullable(),
+  notes: notesText,
 });
 
-export const packingItemSchema = z.object({
+export const packingItemSchema = z.strictObject({
   id,
-  category: z.string().min(1),
-  item: z.string().min(1),
+  category: shortText,
+  item: shortText,
   packed: z.boolean(),
-  notes: z.string(),
+  notes: notesText,
 });
 
 export const tripMetaSchema = z
-  .object({
+  .strictObject({
     id,
-    title: z.string().min(1),
+    title: shortText,
     startDate: isoDate,
     endDate: isoDate,
-    durationWeeks: z.number().int().positive(),
+    durationWeeks: z.number().int().positive().max(520),
     currency: z.literal("EUR"),
     schemaVersion: z.number().int().positive(),
   })
@@ -109,16 +119,16 @@ export const tripMetaSchema = z
     path: ["endDate"],
   });
 
-export const tripDocumentSchema = z.object({
+export const tripDocumentSchema = z.strictObject({
   meta: tripMetaSchema,
-  destinations: z.array(destinationSchema),
-  itinerary: z.array(itinerarySegmentSchema),
-  transport: z.array(transportLegSchema),
-  budget: z.object({
-    categories: z.array(budgetCategorySchema),
-    items: z.array(budgetItemSchema),
+  destinations: z.array(destinationSchema).max(MAX_COLLECTION),
+  itinerary: z.array(itinerarySegmentSchema).max(MAX_COLLECTION),
+  transport: z.array(transportLegSchema).max(MAX_COLLECTION),
+  budget: z.strictObject({
+    categories: z.array(budgetCategorySchema).max(MAX_COLLECTION),
+    items: z.array(budgetItemSchema).max(MAX_COLLECTION),
   }),
-  packing: z.array(packingItemSchema),
+  packing: z.array(packingItemSchema).max(MAX_COLLECTION),
 });
 
 export type TripDocument = z.infer<typeof tripDocumentSchema>;
