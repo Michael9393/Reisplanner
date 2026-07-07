@@ -1,8 +1,9 @@
-node_modules/
-dist/
 *.local
-.DS_Store
-coverage/
-test-results/
-playwright-report/
 *.tsbuildinfo
+.DS_Store
+.husky/_/
+coverage/
+dist/
+node_modules/
+playwright-report/
+test-results/
