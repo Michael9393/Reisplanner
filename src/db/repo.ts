@@ -4,12 +4,20 @@
  * transactie zodat een mislukte import nooit een half bijgewerkte database
  * achterlaat.
  */
+import type { ZodType } from "zod";
 import type { ReisplannerDB } from "./db";
 import type { TripDocument } from "../domain/schema";
-import { parseTripDocument } from "../domain/schema";
+import {
+  budgetItemSchema,
+  destinationSchema,
+  itinerarySegmentSchema,
+  packingItemSchema,
+  parseTripDocument,
+} from "../domain/schema";
 import { documentToRecords, recordsToDocument, serializeDocument } from "./mapping";
 import type {
   BudgetItemRecord,
+  DestinationRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
   TripRecord,
@@ -22,6 +30,30 @@ function now(): string {
 function newId(): string {
   return crypto.randomUUID();
 }
+
+/**
+ * Mutaties valideren hun invoer even streng als de import, zodat er nooit
+ * lokaal data ontstaat die later de export blokkeert. De schema's zijn
+ * afgeleid van het exportcontract (zonder id, dat maken wij zelf).
+ */
+function validateInput<T>(schema: ZodType<T>, input: unknown, label: string): T {
+  const result = schema.safeParse(input);
+  if (!result.success) {
+    const details = result.error.issues
+      .map((issue) => `${issue.path.length ? issue.path.join(".") : label}: ${issue.message}`)
+      .join(" / ");
+    throw new Error(`Ongeldige invoer voor ${label}: ${details}`);
+  }
+  return result.data;
+}
+
+const segmentInputSchema = itinerarySegmentSchema.omit({ id: true });
+const segmentPatchSchema = segmentInputSchema.partial();
+const budgetItemInputSchema = budgetItemSchema.omit({ id: true });
+const budgetItemPatchSchema = budgetItemInputSchema.partial();
+const packingItemInputSchema = packingItemSchema.omit({ id: true });
+const destinationInputSchema = destinationSchema.omit({ id: true });
+const destinationPatchSchema = destinationInputSchema.partial();
 
 /** In v1 is er precies één actieve reis: de eerste (en enige) in de tabel. */
 export async function getActiveTrip(db: ReisplannerDB): Promise<TripRecord | undefined> {
@@ -83,15 +115,22 @@ export async function buildExportDocument(db: ReisplannerDB, tripId: string): Pr
   return check.doc;
 }
 
-/** Exporteert als JSON-tekst en registreert het exportmoment op de reis. */
-export async function exportTripAsJson(
+/**
+ * Bouwt het exportbestand zonder bijwerkingen. Het exportmoment wordt pas
+ * geregistreerd met markExported, nadat de download echt is aangeboden —
+ * anders kan een mislukte export toch als back-up geregistreerd staan.
+ */
+export async function buildExportFile(
   db: ReisplannerDB,
   tripId: string,
 ): Promise<{ json: string; filename: string }> {
   const doc = await buildExportDocument(db, tripId);
-  const json = serializeDocument(doc);
+  return { json: serializeDocument(doc), filename: `${slugify(doc.meta.title)}.json` };
+}
+
+/** Registreert dat de reis zojuist is geëxporteerd. */
+export async function markExported(db: ReisplannerDB, tripId: string): Promise<void> {
   await db.trips.update(tripId, { lastExportedAt: now() });
-  return { json, filename: `${slugify(doc.meta.title)}.json` };
 }
 
 export function slugify(text: string): string {
@@ -111,6 +150,84 @@ async function touchTrip(db: ReisplannerDB, tripId: string): Promise<void> {
 }
 
 /* ------------------------------------------------------------------ */
+/* Bestemmingen                                                        */
+/* ------------------------------------------------------------------ */
+
+export type DestinationInput = Omit<DestinationRecord, "id" | "tripId">;
+
+export async function addDestination(
+  db: ReisplannerDB,
+  tripId: string,
+  input: DestinationInput,
+): Promise<string> {
+  const valid = validateInput(destinationInputSchema, input, "bestemming");
+  const id = newId();
+  await db.transaction("rw", db.destinations, db.trips, async () => {
+    await db.destinations.add({ id, tripId, ...valid });
+    await touchTrip(db, tripId);
+  });
+  return id;
+}
+
+export async function updateDestination(
+  db: ReisplannerDB,
+  tripId: string,
+  destinationId: string,
+  changes: Partial<DestinationInput>,
+): Promise<void> {
+  const valid = validateInput(destinationPatchSchema, changes, "bestemming");
+  await db.transaction("rw", db.destinations, db.trips, async () => {
+    await db.destinations.update(destinationId, valid);
+    await touchTrip(db, tripId);
+  });
+}
+
+/**
+ * Verwijdert een bestemming. Geblokkeerd zolang er verblijven naar verwijzen
+ * (planningsdata verdwijnt nooit stilzwijgend); transport- en
+ * budgetverwijzingen worden wél automatisch losgekoppeld (→ null).
+ */
+export async function deleteDestination(
+  db: ReisplannerDB,
+  tripId: string,
+  destinationId: string,
+): Promise<void> {
+  await db.transaction(
+    "rw",
+    db.destinations,
+    db.itinerarySegments,
+    db.transportLegs,
+    db.budgetItems,
+    db.trips,
+    async () => {
+      const segmentCount = await db.itinerarySegments
+        .where("destinationId")
+        .equals(destinationId)
+        .count();
+      if (segmentCount > 0) {
+        throw new Error(
+          `Deze bestemming heeft nog ${segmentCount} ${segmentCount === 1 ? "verblijf" : "verblijven"} in de planning. Verplaats of verwijder die eerst.`,
+        );
+      }
+      await db.transportLegs
+        .where("fromDestinationId")
+        .equals(destinationId)
+        .modify({ fromDestinationId: null });
+      await db.transportLegs
+        .where("toDestinationId")
+        .equals(destinationId)
+        .modify({ toDestinationId: null });
+      await db.budgetItems
+        .where("destinationId")
+        .equals(destinationId)
+        .modify({ destinationId: null });
+      await db.destinations.delete(destinationId);
+      await touchTrip(db, tripId);
+    },
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Segmenten                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -123,9 +240,10 @@ export type SegmentInput = {
 };
 
 export async function addSegment(db: ReisplannerDB, tripId: string, input: SegmentInput): Promise<string> {
+  const valid = validateInput(segmentInputSchema, input, "verblijf");
   const id = newId();
   await db.transaction("rw", db.itinerarySegments, db.trips, async () => {
-    await db.itinerarySegments.add({ id, tripId, ...input });
+    await db.itinerarySegments.add({ id, tripId, ...valid });
     await touchTrip(db, tripId);
   });
   return id;
@@ -137,8 +255,9 @@ export async function updateSegment(
   segmentId: string,
   changes: Partial<SegmentInput>,
 ): Promise<void> {
+  const valid = validateInput(segmentPatchSchema, changes, "verblijf");
   await db.transaction("rw", db.itinerarySegments, db.trips, async () => {
-    await db.itinerarySegments.update(segmentId, changes);
+    await db.itinerarySegments.update(segmentId, valid);
     await touchTrip(db, tripId);
   });
 }
@@ -165,9 +284,10 @@ export async function deleteSegment(db: ReisplannerDB, tripId: string, segmentId
 export type BudgetItemInput = Omit<BudgetItemRecord, "id" | "tripId">;
 
 export async function addBudgetItem(db: ReisplannerDB, tripId: string, input: BudgetItemInput): Promise<string> {
+  const valid = validateInput(budgetItemInputSchema, input, "budgetpost");
   const id = newId();
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
-    await db.budgetItems.add({ id, tripId, ...input });
+    await db.budgetItems.add({ id, tripId, ...valid });
     await touchTrip(db, tripId);
   });
   return id;
@@ -179,8 +299,9 @@ export async function updateBudgetItem(
   itemId: string,
   changes: Partial<BudgetItemInput>,
 ): Promise<void> {
+  const valid = validateInput(budgetItemPatchSchema, changes, "budgetpost");
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
-    await db.budgetItems.update(itemId, changes);
+    await db.budgetItems.update(itemId, valid);
     await touchTrip(db, tripId);
   });
 }
@@ -201,9 +322,10 @@ export async function addPackingItem(
   tripId: string,
   input: Omit<PackingItemRecord, "id" | "tripId">,
 ): Promise<string> {
+  const valid = validateInput(packingItemInputSchema, input, "paklijstitem");
   const id = newId();
   await db.transaction("rw", db.packingItems, db.trips, async () => {
-    await db.packingItems.add({ id, tripId, ...input });
+    await db.packingItems.add({ id, tripId, ...valid });
     await touchTrip(db, tripId);
   });
   return id;

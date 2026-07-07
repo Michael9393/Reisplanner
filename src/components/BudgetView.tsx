@@ -13,6 +13,7 @@ import {
   type Totals,
 } from "../domain/budget";
 import { addDays, formatDayMonthNL } from "../domain/dates";
+import { countriesInTripOrder } from "../domain/itinerary";
 import { formatEuro } from "../domain/format";
 import {
   addBudgetItem,
@@ -54,16 +55,9 @@ export function BudgetView({ data, trip }: { data: TripData; trip: TripRecord })
     [ctx.categories],
   );
 
-  // Landen in reisvolgorde (volgorde van eerste segment), "Algemeen" achteraan.
+  // Landen in reisvolgorde, "Algemeen" (globale posten) achteraan.
   const countryRows = useMemo(() => {
-    const order: string[] = [];
-    for (const segment of ctx.segments) {
-      const country = ctx.destinations.find((d) => d.id === segment.destinationId)?.country;
-      if (country && !order.includes(country)) order.push(country);
-    }
-    for (const country of [...byCountry.keys()].sort((a, b) => a.localeCompare(b, "nl"))) {
-      if (country !== GLOBAL_BUCKET && !order.includes(country)) order.push(country);
-    }
+    const order = countriesInTripOrder(ctx.destinations, ctx.segments);
     if (byCountry.has(GLOBAL_BUCKET)) order.push(GLOBAL_BUCKET);
     return order
       .filter((country) => byCountry.has(country))

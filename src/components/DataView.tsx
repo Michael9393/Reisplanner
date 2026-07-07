@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import { db } from "../db/db";
 import type { TripData } from "../hooks/useTripData";
 import type { TripRecord } from "../domain/types";
-import { parseTripDocumentFromText } from "../domain/schema";
-import { exportTripAsJson, importDocument, wipeDatabase } from "../db/repo";
+import { MAX_IMPORT_BYTES, parseTripDocumentFromText } from "../domain/schema";
+import { buildExportFile, importDocument, markExported, wipeDatabase } from "../db/repo";
 import { getSeedDocument } from "../db/seed";
 import { downloadTextFile } from "../ui/download";
 import { formatTimestampNL } from "../domain/format";
@@ -17,8 +17,11 @@ export function useExportAction(trip: TripRecord | null) {
   async function run() {
     if (!trip) return;
     try {
-      const { json, filename } = await exportTripAsJson(db, trip.id);
+      // Eerst de download echt aanbieden, pas daarna het exportmoment
+      // registreren — een mislukte export mag nooit als back-up gelden.
+      const { json, filename } = await buildExportFile(db, trip.id);
       downloadTextFile(filename, json);
+      await markExported(db, trip.id);
       setIsError(false);
       setMessage(`Export gedownload als "${filename}". Bewaar het bestand buiten de browser, bij voorkeur in Git.`);
     } catch (error: unknown) {
@@ -45,6 +48,12 @@ export function ImportPanel({ hasExistingTrip }: { hasExistingTrip: boolean }) {
     setImportErrors([]);
     setImportSuccess(null);
     try {
+      if (file.size > MAX_IMPORT_BYTES) {
+        setImportErrors([
+          `Het bestand is ${(file.size / 1024 / 1024).toFixed(1)} MB; imports zijn begrensd op ${MAX_IMPORT_BYTES / 1024 / 1024} MB. Een reisdocument is normaal minder dan 1 MB — dit lijkt geen exportbestand.`,
+        ]);
+        return;
+      }
       const text = await file.text();
       const result = parseTripDocumentFromText(text);
       if (!result.ok) {
@@ -107,25 +116,41 @@ export function ImportPanel({ hasExistingTrip }: { hasExistingTrip: boolean }) {
 export function DataView({ data, trip }: { data: TripData; trip: TripRecord }) {
   const exportAction = useExportAction(trip);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | null>(null);
+  const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
 
   const unsavedChanges =
     trip.lastExportedAt === null || trip.updatedAt > trip.lastExportedAt;
 
   async function reloadSeed() {
     if (!window.confirm("De huidige reis vervangen door de meegeleverde voorbeeldreis?")) return;
-    await importDocument(db, getSeedDocument());
-    setMaintenanceMessage("Voorbeeldreis opnieuw geladen.");
+    setMaintenanceMessage(null);
+    setMaintenanceError(null);
+    try {
+      await importDocument(db, getSeedDocument());
+      setMaintenanceMessage("Voorbeeldreis opnieuw geladen.");
+    } catch (error: unknown) {
+      setMaintenanceError(
+        `Voorbeeldreis laden is mislukt: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async function wipe() {
-    if (
-      !window.confirm(
-        "Alle lokale reisdata wissen? Zorg dat je eerst hebt geëxporteerd — zonder exportbestand is de planning daarna weg.",
-      )
-    ) {
-      return;
+    const warning = unsavedChanges
+      ? trip.lastExportedAt === null
+        ? "LET OP: deze reis is nog NOOIT geëxporteerd. Zonder exportbestand is de planning definitief weg.\n\n"
+        : "LET OP: er zijn wijzigingen die nog in geen enkel exportbestand staan; die gaan verloren.\n\n"
+      : "";
+    if (!window.confirm(`${warning}Alle lokale reisdata wissen?`)) return;
+    setMaintenanceMessage(null);
+    setMaintenanceError(null);
+    try {
+      await wipeDatabase(db);
+    } catch (error: unknown) {
+      setMaintenanceError(
+        `Wissen is mislukt: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-    await wipeDatabase(db);
   }
 
   return (
@@ -207,6 +232,7 @@ export function DataView({ data, trip }: { data: TripData; trip: TripRecord }) {
         {maintenanceMessage && (
           <p className="mt-2 text-sm text-emerald-700">{maintenanceMessage}</p>
         )}
+        {maintenanceError && <p className="mt-2 text-sm text-red-600">{maintenanceError}</p>}
       </SectionCard>
 
       <p className="text-xs text-slate-400">

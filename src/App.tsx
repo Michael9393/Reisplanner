@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { db } from "./db/db";
 import { loadSeedIfEmpty } from "./db/seed";
 import { useTripData } from "./hooks/useTripData";
@@ -7,11 +7,17 @@ import { TABS, useUIStore } from "./state/ui";
 import { formatDateFullNL } from "./domain/dates";
 import { formatTimestampNL } from "./domain/format";
 import { PlanningView } from "./components/PlanningView";
-import { MapView } from "./components/MapView";
+import { DestinationsView } from "./components/DestinationsView";
 import { BudgetView } from "./components/BudgetView";
 import { PackingView } from "./components/PackingView";
 import { DataView, ImportPanel, useExportAction } from "./components/DataView";
 import { primaryButton } from "./components/shared";
+
+// Leaflet is het grootste stuk van de bundel en alleen nodig op het
+// kaart-tabblad; lazy laden houdt de eerste load klein.
+const MapView = lazy(() =>
+  import("./components/MapView").then((m) => ({ default: m.MapView })),
+);
 
 export default function App() {
   const [seedError, setSeedError] = useState<string | null>(null);
@@ -68,7 +74,14 @@ export default function App() {
         ) : (
           <>
             {tab === "planning" && <PlanningView data={data} trip={trip} />}
-            {tab === "kaart" && <MapView data={data} />}
+            {tab === "kaart" && (
+              <Suspense
+                fallback={<p className="p-4 text-sm text-slate-500">Kaart laden…</p>}
+              >
+                <MapView data={data} />
+              </Suspense>
+            )}
+            {tab === "bestemmingen" && <DestinationsView data={data} trip={trip} />}
             {tab === "budget" && <BudgetView data={data} trip={trip} />}
             {tab === "paklijst" && <PackingView data={data} trip={trip} />}
             {tab === "data" && <DataView data={data} trip={trip} />}

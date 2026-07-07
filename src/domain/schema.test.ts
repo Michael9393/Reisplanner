@@ -166,6 +166,39 @@ describe("parseTripDocument", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.errors[0]).toContain("dubbel id");
   });
+
+  it("weigert onbekende velden in plaats van ze stil te laten verdwijnen (strict)", () => {
+    const withUnknownRoot = { ...minimalDoc(), dagboek: [] };
+    const rootResult = parseTripDocument(withUnknownRoot);
+    expect(rootResult.ok).toBe(false);
+    if (!rootResult.ok) expect(rootResult.errors.join(" ")).toContain("dagboek");
+
+    const doc = minimalDoc();
+    (doc.destinations[0] as Record<string, unknown>).kleur = "paars";
+    const nestedResult = parseTripDocument(doc);
+    expect(nestedResult.ok).toBe(false);
+    if (!nestedResult.ok) expect(nestedResult.errors.join(" ")).toContain("kleur");
+  });
+
+  it("weigert extreme veldlengtes en collectiegroottes", () => {
+    const longNotes = minimalDoc();
+    longNotes.destinations[0].notes = "x".repeat(5001);
+    expect(parseTripDocument(longNotes).ok).toBe(false);
+
+    const longName = minimalDoc();
+    longName.meta.title = "x".repeat(201);
+    expect(parseTripDocument(longName).ok).toBe(false);
+
+    const tooMany = minimalDoc();
+    tooMany.packing = Array.from({ length: 2001 }, (_, i) => ({
+      id: `p-${i}`,
+      category: "Test",
+      item: `Item ${i}`,
+      packed: false,
+      notes: "",
+    }));
+    expect(parseTripDocument(tooMany).ok).toBe(false);
+  });
 });
 
 describe("parseTripDocumentFromText", () => {

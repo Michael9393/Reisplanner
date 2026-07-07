@@ -7,10 +7,13 @@ import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it } from "vitest";
 import { ReisplannerDB } from "./db";
 import {
+  addSegment,
   buildExportDocument,
+  buildExportFile,
   deleteSegment,
-  exportTripAsJson,
   importDocument,
+  markExported,
+  updateBudgetItem,
   updateSegment,
   wipeDatabase,
 } from "./repo";
@@ -117,16 +120,68 @@ describe("importDocument + buildExportDocument", () => {
     expect(await db.itinerarySegments.count()).toBe(20);
   });
 
-  it("exportTripAsJson registreert het exportmoment en levert een nette bestandsnaam", async () => {
+  it("buildExportFile heeft geen bijwerkingen; markExported registreert het exportmoment", async () => {
     const db = freshDb();
     await importDocument(db, getSeedDocument());
 
-    const { json, filename } = await exportTripAsJson(db, TRIP_ID);
+    const { json, filename } = await buildExportFile(db, TRIP_ID);
     expect(filename).toBe("oost-azie-2027.json");
     expect(json.endsWith("\n")).toBe(true);
 
-    const trip = await db.trips.get(TRIP_ID);
-    expect(trip?.lastExportedAt).not.toBeNull();
+    // Alleen bouwen van het bestand telt nog niet als back-up.
+    expect((await db.trips.get(TRIP_ID))?.lastExportedAt).toBeNull();
+
+    await markExported(db, TRIP_ID);
+    expect((await db.trips.get(TRIP_ID))?.lastExportedAt).not.toBeNull();
+  });
+});
+
+describe("repo-laag-validatie", () => {
+  it("weigert een segment met negatieve nachten even streng als de import", async () => {
+    const db = freshDb();
+    await importDocument(db, getSeedDocument());
+
+    await expect(
+      addSegment(db, TRIP_ID, {
+        destinationId: "cn-beijing",
+        startDate: "2027-05-10",
+        nights: -1,
+        status: "idee",
+        notes: "",
+      }),
+    ).rejects.toThrow(/Ongeldige invoer/);
+    expect(await db.itinerarySegments.count()).toBe(20);
+
+    await expect(
+      updateSegment(db, TRIP_ID, "seg-kyoto", { nights: -3 }),
+    ).rejects.toThrow(/Ongeldige invoer/);
+    expect((await db.itinerarySegments.get("seg-kyoto"))?.nights).toBe(7);
+  });
+
+  it("weigert budgetmutaties met negatieve of onzinnige bedragen", async () => {
+    const db = freshDb();
+    await importDocument(db, getSeedDocument());
+
+    await expect(
+      updateBudgetItem(db, TRIP_ID, "b-buffer", { amountActual: -50 }),
+    ).rejects.toThrow(/Ongeldige invoer/);
+    expect((await db.budgetItems.get("b-buffer"))?.amountActual).toBeNull();
+
+    await expect(
+      updateBudgetItem(db, TRIP_ID, "b-buffer", { amountPlanned: 1e12 }),
+    ).rejects.toThrow(/Ongeldige invoer/);
+  });
+
+  it("weigert onbekende velden in mutatie-invoer (strict)", async () => {
+    const db = freshDb();
+    await importDocument(db, getSeedDocument());
+
+    await expect(
+      updateSegment(db, TRIP_ID, "seg-kyoto", {
+        nights: 5,
+        onbekendVeld: true,
+      } as never),
+    ).rejects.toThrow(/Ongeldige invoer/);
   });
 });
 
