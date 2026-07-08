@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { ReisplannerDB } from "../db/db";
 import { db } from "../db/db";
 import {
   addDestination,
@@ -6,6 +7,7 @@ import {
   deleteDestination,
   updateDestination,
 } from "../db/repo";
+import { buildSeasonalFromClimate } from "../domain/climate";
 import { addDays, formatHalfMonthNL, halfMonthsBetween } from "../domain/dates";
 import { countriesInTripOrder } from "../domain/itinerary";
 import type {
@@ -17,7 +19,9 @@ import type {
 } from "../domain/types";
 import { HAZARDS, STATUSES } from "../domain/types";
 import type { TripData } from "../hooks/useTripData";
+import { fetchClimateDaily } from "../services/openMeteo";
 import { useUIStore } from "../state/ui";
+import { PlaceSearchInput } from "./PlaceSearchInput";
 import {
   dangerButton,
   inputClass,
@@ -174,34 +178,87 @@ const COORD_PAIR = /^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/;
 /** Editor-rij met een stabiele React-key, los van de (bewerkbare) periode. */
 type SeasonalRow = SeasonalPeriod & { rowId: string };
 
-function DestinationEditor({
+/**
+ * Vult de seizoensdata van een net aangemaakte bestemming op de achtergrond
+ * met klimaatnormalen — maar alleen zolang er ondertussen geen handwerk is
+ * verschenen. Fouten (bv. offline) verdwijnen stil: de lijst toont dan
+ * gewoon "geen seizoensdata".
+ */
+export async function autoFillSeasonal(
+  db: ReisplannerDB,
+  trip: TripRecord,
+  destinationId: string,
+  coords: { lat: number; lng: number },
+): Promise<void> {
+  const result = await fetchClimateDaily(coords);
+  if (!result.ok) return;
+  const seasonal = buildSeasonalFromClimate(
+    result.daily,
+    halfMonthsBetween(trip.startDate, trip.endDate),
+    coords,
+  );
+  if (seasonal.length === 0) return;
+  const current = await db.destinations.get(destinationId);
+  if (!current || current.seasonal.length > 0) return;
+  try {
+    await updateDestination(db, trip.id, destinationId, { seasonal });
+  } catch {
+    // Niet-blokkerend: de gebruiker kan de knop in de editor gebruiken.
+  }
+}
+
+export function DestinationEditor({
   trip,
   destination,
   existingCountries,
   segmentCount,
   onClose,
+  initialValues,
+  onSave,
 }: {
   trip: TripRecord;
   destination: DestinationRecord | null;
   existingCountries: string[];
   segmentCount: number;
   onClose: () => void;
+  /** Prefill voor een nieuwe bestemming (bv. promotie vanuit het kladblok). */
+  initialValues?: Partial<DestinationInput>;
+  /** Vervangt de standaard opslag (add/update), bv. door promoteIdea. */
+  onSave?: (input: DestinationInput) => Promise<void>;
 }) {
-  const [name, setName] = useState(destination?.name ?? "");
-  const [country, setCountry] = useState(destination?.country ?? "");
-  const [lat, setLat] = useState(destination ? String(destination.coords.lat) : "");
-  const [lng, setLng] = useState(destination ? String(destination.coords.lng) : "");
-  const [activities, setActivities] = useState(destination?.activities.join(", ") ?? "");
-  const [status, setStatus] = useState<Status>(destination?.status ?? "kandidaat");
-  const [notes, setNotes] = useState(destination?.notes ?? "");
-  const [seasonal, setSeasonal] = useState<SeasonalRow[]>(
+  const [name, setName] = useState(destination?.name ?? initialValues?.name ?? "");
+  const [country, setCountry] = useState(destination?.country ?? initialValues?.country ?? "");
+  const [lat, setLat] = useState(
     destination
-      ? destination.seasonal.map((s) => ({
-          ...s,
-          hazards: [...s.hazards],
-          rowId: crypto.randomUUID(),
-        }))
-      : [],
+      ? String(destination.coords.lat)
+      : initialValues?.coords
+        ? String(initialValues.coords.lat)
+        : "",
+  );
+  const [lng, setLng] = useState(
+    destination
+      ? String(destination.coords.lng)
+      : initialValues?.coords
+        ? String(initialValues.coords.lng)
+        : "",
+  );
+  const [activities, setActivities] = useState(
+    destination?.activities.join(", ") ?? initialValues?.activities?.join(", ") ?? "",
+  );
+  const [status, setStatus] = useState<Status>(
+    destination?.status ?? initialValues?.status ?? "kandidaat",
+  );
+  const [notes, setNotes] = useState(destination?.notes ?? initialValues?.notes ?? "");
+  const [infoUrl, setInfoUrl] = useState<string | null>(
+    destination?.infoUrl ?? initialValues?.infoUrl ?? null,
+  );
+  const [fetchingSeason, setFetchingSeason] = useState(false);
+  const [seasonal, setSeasonal] = useState<SeasonalRow[]>(
+    (destination?.seasonal ?? initialValues?.seasonal ?? []).map((s) => ({
+      ...s,
+      hazards: [...s.hazards],
+      rowId: crypto.randomUUID(),
+    })),
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -253,9 +310,49 @@ function DestinationEditor({
     }
   }
 
+  const latNum = Number(lat);
+  const lngNum = Number(lng);
+  const hasValidCoords =
+    lat.trim() !== "" &&
+    lng.trim() !== "" &&
+    Number.isFinite(latNum) &&
+    Number.isFinite(lngNum) &&
+    Math.abs(latNum) <= 90 &&
+    Math.abs(lngNum) <= 180;
+
+  /** Haalt klimaatnormalen op en vervangt de seizoenslijst — na bevestiging. */
+  async function fetchSeasonal() {
+    if (!hasValidCoords || fetchingSeason) return;
+    if (
+      seasonal.length > 0 &&
+      !window.confirm(
+        "Er staan al seizoensperiodes. Vervangen door automatisch opgehaalde klimaatdata?",
+      )
+    ) {
+      return;
+    }
+    setFetchingSeason(true);
+    setError(null);
+    const coords = { lat: latNum, lng: lngNum };
+    const result = await fetchClimateDaily(coords);
+    setFetchingSeason(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    const generated = buildSeasonalFromClimate(
+      result.daily,
+      halfMonthsBetween(trip.startDate, trip.endDate),
+      coords,
+    );
+    if (generated.length === 0) {
+      setError("Geen klimaatdata beschikbaar voor deze locatie.");
+      return;
+    }
+    setSeasonal(generated.map((entry) => ({ ...entry, rowId: crypto.randomUUID() })));
+  }
+
   async function save() {
-    const latNum = Number(lat);
-    const lngNum = Number(lng);
     if (name.trim() === "") return setError("Geef de bestemming een naam.");
     if (country.trim() === "") return setError("Vul een land in.");
     if (
@@ -289,13 +386,20 @@ function DestinationEditor({
         .map(({ rowId: _rowId, ...entry }) => entry)
         .sort((a, b) => a.period.localeCompare(b.period)),
       notes,
-      infoUrl: destination?.infoUrl ?? null,
+      infoUrl,
     };
     try {
-      if (destination) {
+      if (onSave) {
+        await onSave(input);
+      } else if (destination) {
         await updateDestination(db, trip.id, destination.id, input);
       } else {
-        await addDestination(db, trip.id, input);
+        const newId = await addDestination(db, trip.id, input);
+        // Lege seizoenslijst? Vul die op de achtergrond met klimaatdata;
+        // dit blokkeert het sluiten niet en overschrijft nooit handwerk.
+        if (input.seasonal.length === 0) {
+          void autoFillSeasonal(db, trip, newId, input.coords);
+        }
       }
       onClose();
     } catch (e: unknown) {
@@ -328,13 +432,39 @@ function DestinationEditor({
             <label className={labelClass} htmlFor="dest-name">
               Naam
             </label>
-            <input
+            <PlaceSearchInput
               id="dest-name"
-              className={inputClass}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={setName}
+              onSelect={(suggestion) => {
+                setName(suggestion.name);
+                setLat(String(suggestion.coords.lat));
+                setLng(String(suggestion.coords.lng));
+                if (suggestion.country && country.trim() === "") setCountry(suggestion.country);
+                setInfoUrl(suggestion.infoUrl);
+              }}
               placeholder="bijv. Nikko"
             />
+            {infoUrl && (
+              <p className="mt-1 flex items-center gap-1.5 text-xs">
+                <a
+                  href={infoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-700 underline hover:text-emerald-900"
+                >
+                  Wikipedia ↗
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setInfoUrl(null)}
+                  className="rounded px-1 text-slate-400 hover:text-red-500"
+                  aria-label="Link verwijderen"
+                >
+                  ✕
+                </button>
+              </p>
+            )}
           </div>
           <div>
             <label className={labelClass} htmlFor="dest-country">
@@ -430,17 +560,32 @@ function DestinationEditor({
         </div>
 
         <div className="rounded-lg bg-slate-50 p-3">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-medium text-slate-600">
               Seizoen per halve maand (1 = slecht, 5 = uitstekend)
             </p>
-            <button
-              type="button"
-              onClick={addPeriod}
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              + Periode
-            </button>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={fetchSeasonal}
+                disabled={!hasValidCoords || fetchingSeason}
+                title={
+                  hasValidCoords
+                    ? "Klimaatnormalen (Open-Meteo, 2015–2024) omzetten naar ratings per halve maand"
+                    : "Vul eerst geldige coördinaten in"
+                }
+                className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              >
+                {fetchingSeason ? "Ophalen…" : "Seizoensdata ophalen"}
+              </button>
+              <button
+                type="button"
+                onClick={addPeriod}
+                className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              >
+                + Periode
+              </button>
+            </div>
           </div>
           <div className="space-y-2">
             {seasonal.map((entry, index) => (
