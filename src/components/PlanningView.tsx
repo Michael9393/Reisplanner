@@ -1,16 +1,35 @@
 import { useMemo, useState } from "react";
 import { db } from "../db/db";
-import { addSegment, deleteSegment, type SegmentInput, updateSegment } from "../db/repo";
-import { addDays, diffDays, formatDateNL, formatDayMonthNL, tripWeekNumber } from "../domain/dates";
+import {
+  addSegment,
+  addTransportLeg,
+  deleteSegment,
+  deleteTransportLeg,
+  type SegmentInput,
+  type TransportInput,
+  updateSegment,
+  updateSegmentWithShift,
+  updateTransportLeg,
+} from "../db/repo";
+import {
+  addDays,
+  diffDays,
+  formatDateNL,
+  formatDayMonthNL,
+  isValidISODate,
+  tripWeekNumber,
+} from "../domain/dates";
 import { formatEuro } from "../domain/format";
+import { planShiftForSegmentEdit, shiftDelta } from "../domain/itinerary";
 import { assessSeason, hasSeasonWarning } from "../domain/season";
 import type {
   DestinationRecord,
   ItinerarySegmentRecord,
   TransportLegRecord,
+  TransportMode,
   TripRecord,
 } from "../domain/types";
-import { STATUSES } from "../domain/types";
+import { STATUSES, TRANSPORT_MODES } from "../domain/types";
 import type { TripData } from "../hooks/useTripData";
 import { useUIStore } from "../state/ui";
 import {
@@ -31,7 +50,8 @@ type TimelineEntry =
 
 export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord }) {
   const { destinations, segments, transport } = data;
-  const { editingSegmentId, setEditingSegmentId } = useUIStore();
+  const { editingSegmentId, setEditingSegmentId, editingTransportId, setEditingTransportId } =
+    useUIStore();
 
   const destinationById = useMemo(
     () => new Map(destinations.map((d) => [d.id, d])),
@@ -72,9 +92,22 @@ export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord 
             tone={warningCount > 0 ? "warn" : "ok"}
           />
         </div>
-        <button type="button" className={primaryButton} onClick={() => setEditingSegmentId("new")}>
-          + Segment toevoegen
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={secondaryButton}
+            onClick={() => setEditingTransportId("new")}
+          >
+            + Transport
+          </button>
+          <button
+            type="button"
+            className={primaryButton}
+            onClick={() => setEditingSegmentId("new")}
+          >
+            + Segment toevoegen
+          </button>
+        </div>
       </div>
 
       {totalNights !== tripNights && (
@@ -87,7 +120,13 @@ export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord 
       <ol className="space-y-2">
         {timeline.map((entry, index) => {
           if (entry.kind === "transport") {
-            return <TransportRow key={`t-${entry.leg.id}`} leg={entry.leg} />;
+            return (
+              <TransportRow
+                key={`t-${entry.leg.id}`}
+                leg={entry.leg}
+                onEdit={() => setEditingTransportId(entry.leg.id)}
+              />
+            );
           }
           const previousSegment = findPreviousSegment(timeline, index);
           return (
@@ -115,6 +154,8 @@ export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord 
           key={editingSegmentId}
           trip={trip}
           destinations={destinations}
+          segments={segments}
+          transport={transport}
           segment={
             editingSegmentId === "new"
               ? null
@@ -129,6 +170,28 @@ export function PlanningView({ data, trip }: { data: TripData; trip: TripRecord 
               : trip.startDate
           }
           onClose={() => setEditingSegmentId(null)}
+        />
+      )}
+
+      {editingTransportId !== null && (
+        <TransportEditor
+          key={editingTransportId}
+          trip={trip}
+          destinations={destinations}
+          leg={
+            editingTransportId === "new"
+              ? null
+              : (transport.find((t) => t.id === editingTransportId) ?? null)
+          }
+          suggestedDate={
+            segments.length > 0
+              ? addDays(
+                  segments[segments.length - 1].startDate,
+                  segments[segments.length - 1].nights,
+                )
+              : trip.startDate
+          }
+          onClose={() => setEditingTransportId(null)}
         />
       )}
     </div>
@@ -188,15 +251,21 @@ function ConnectionIssue({
   );
 }
 
-function TransportRow({ leg }: { leg: TransportLegRecord }) {
+function TransportRow({ leg, onEdit }: { leg: TransportLegRecord; onEdit: () => void }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-1 text-sm text-slate-500">
-      <span aria-hidden>{MODE_ICON[leg.mode]}</span>
-      <span className="text-xs text-slate-400">{formatDateNL(leg.date)}</span>
-      <span>{leg.label}</span>
-      {leg.estimatedCost !== null && (
-        <span className="text-xs text-slate-400">± {formatEuro(leg.estimatedCost)}</span>
-      )}
+    <li>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="flex w-full items-center gap-3 rounded-lg px-4 py-1 text-left text-sm text-slate-500 hover:bg-white hover:text-slate-700"
+      >
+        <span aria-hidden>{MODE_ICON[leg.mode]}</span>
+        <span className="text-xs text-slate-400">{formatDateNL(leg.date)}</span>
+        <span>{leg.label}</span>
+        {leg.estimatedCost !== null && (
+          <span className="text-xs text-slate-400">± {formatEuro(leg.estimatedCost)}</span>
+        )}
+      </button>
     </li>
   );
 }
@@ -250,15 +319,32 @@ function SegmentCard({
   );
 }
 
+/** Groepeert bestemmingen per land voor een select met optgroups. */
+function groupDestinationsByCountry(
+  destinations: DestinationRecord[],
+): [string, DestinationRecord[]][] {
+  const groups = new Map<string, DestinationRecord[]>();
+  for (const dest of [...destinations].sort((a, b) => a.name.localeCompare(b.name, "nl"))) {
+    const list = groups.get(dest.country) ?? [];
+    list.push(dest);
+    groups.set(dest.country, list);
+  }
+  return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "nl"));
+}
+
 function SegmentEditor({
   trip,
   destinations,
+  segments,
+  transport,
   segment,
   suggestedStartDate,
   onClose,
 }: {
   trip: TripRecord;
   destinations: DestinationRecord[];
+  segments: ItinerarySegmentRecord[];
+  transport: TransportLegRecord[];
   segment: ItinerarySegmentRecord | null;
   suggestedStartDate: string;
   onClose: () => void;
@@ -270,20 +356,37 @@ function SegmentEditor({
     status: segment?.status ?? "kandidaat",
     notes: segment?.notes ?? "",
   });
+  const [shiftFollowing, setShiftFollowing] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const byCountry = useMemo(() => {
-    const groups = new Map<string, DestinationRecord[]>();
-    for (const dest of [...destinations].sort((a, b) => a.name.localeCompare(b.name, "nl"))) {
-      const list = groups.get(dest.country) ?? [];
-      list.push(dest);
-      groups.set(dest.country, list);
-    }
-    return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "nl"));
-  }, [destinations]);
+  const byCountry = useMemo(() => groupDestinationsByCountry(destinations), [destinations]);
 
   const previewDestination = destinations.find((d) => d.id === form.destinationId);
   const preview = assessSeason(previewDestination, form.startDate, form.nights);
+
+  // Kettingverschuiving: wat zou er meebewegen met de huidige formulierwaarden?
+  const shift = useMemo(() => {
+    if (!segment || !isValidISODate(form.startDate)) return null;
+    return planShiftForSegmentEdit({
+      segments,
+      transport,
+      segmentId: segment.id,
+      oldStartDate: segment.startDate,
+      oldNights: segment.nights,
+      newStartDate: form.startDate,
+      newNights: form.nights,
+    });
+  }, [segment, segments, transport, form.startDate, form.nights]);
+  const shiftCount = shift ? shift.segmentChanges.length + shift.transportChanges.length : 0;
+  const delta =
+    segment && isValidISODate(form.startDate)
+      ? shiftDelta({
+          oldStartDate: segment.startDate,
+          oldNights: segment.nights,
+          newStartDate: form.startDate,
+          newNights: form.nights,
+        })
+      : 0;
 
   async function save() {
     if (!form.destinationId) {
@@ -296,7 +399,11 @@ function SegmentEditor({
     }
     try {
       if (segment) {
-        await updateSegment(db, trip.id, segment.id, form);
+        if (shiftFollowing && shift && shiftCount > 0) {
+          await updateSegmentWithShift(db, trip.id, segment.id, form, shift);
+        } else {
+          await updateSegment(db, trip.id, segment.id, form);
+        }
       } else {
         await addSegment(db, trip.id, form);
       }
@@ -412,10 +519,251 @@ function SegmentEditor({
           ))}
         </div>
 
+        {segment && shift && shiftCount > 0 && (
+          <label className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+            <input
+              type="checkbox"
+              checked={shiftFollowing}
+              onChange={(e) => setShiftFollowing(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-emerald-600"
+            />
+            <span className="text-sm text-amber-900">
+              Verschuif de rest van de reis mee: {shift.segmentChanges.length}{" "}
+              {shift.segmentChanges.length === 1 ? "verblijf" : "verblijven"} en{" "}
+              {shift.transportChanges.length}{" "}
+              {shift.transportChanges.length === 1 ? "transport" : "transporten"}
+              {delta !== 0 && (
+                <>
+                  {" "}
+                  {delta > 0 ? `${delta} ${delta === 1 ? "dag" : "dagen"} later` : ""}
+                  {delta < 0 ? `${-delta} ${delta === -1 ? "dag" : "dagen"} eerder` : ""}
+                </>
+              )}
+              .
+            </span>
+          </label>
+        )}
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex justify-between pt-1">
           {segment ? (
+            <button type="button" className={dangerButton} onClick={remove}>
+              Verwijderen
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-2">
+            <button type="button" className={secondaryButton} onClick={onClose}>
+              Annuleren
+            </button>
+            <button type="button" className={primaryButton} onClick={save}>
+              Opslaan
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function TransportEditor({
+  trip,
+  destinations,
+  leg,
+  suggestedDate,
+  onClose,
+}: {
+  trip: TripRecord;
+  destinations: DestinationRecord[];
+  leg: TransportLegRecord | null;
+  suggestedDate: string;
+  onClose: () => void;
+}) {
+  const [date, setDate] = useState(leg?.date ?? suggestedDate);
+  const [mode, setMode] = useState<TransportMode>(leg?.mode ?? "trein");
+  const [fromId, setFromId] = useState(leg?.fromDestinationId ?? "");
+  const [toId, setToId] = useState(leg?.toDestinationId ?? "");
+  const [label, setLabel] = useState(leg?.label ?? "");
+  const [cost, setCost] = useState(leg?.estimatedCost?.toString() ?? "");
+  const [notes, setNotes] = useState(leg?.notes ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const byCountry = useMemo(() => groupDestinationsByCountry(destinations), [destinations]);
+  const nameOf = (id: string) => destinations.find((d) => d.id === id)?.name;
+  const labelSuggestion =
+    fromId && toId ? `${nameOf(fromId)} – ${nameOf(toId)}` : "bijv. Shinkansen Kyoto – Tokyo";
+
+  async function save() {
+    if (!date) return setError("Kies een datum.");
+    const trimmedLabel = label.trim() || (fromId && toId ? labelSuggestion : "");
+    if (!trimmedLabel) return setError("Geef het transport een omschrijving.");
+    const trimmedCost = cost.trim();
+    const costValue = trimmedCost === "" ? null : Number(trimmedCost.replace(",", "."));
+    if (costValue !== null && (!Number.isFinite(costValue) || costValue < 0)) {
+      return setError("Geschatte kosten zijn ongeldig.");
+    }
+
+    const input: TransportInput = {
+      fromDestinationId: fromId || null,
+      toDestinationId: toId || null,
+      date,
+      mode,
+      label: trimmedLabel,
+      estimatedCost: costValue,
+      notes,
+    };
+    try {
+      if (leg) {
+        await updateTransportLeg(db, trip.id, leg.id, input);
+      } else {
+        await addTransportLeg(db, trip.id, input);
+      }
+      onClose();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function remove() {
+    if (!leg) return;
+    if (
+      !window.confirm(
+        `Transport "${leg.label}" verwijderen? Budgetposten die ernaar verwijzen worden losgekoppeld.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteTransportLeg(db, trip.id, leg.id);
+      onClose();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function destinationSelect(
+    id: string,
+    value: string,
+    onChange: (value: string) => void,
+    ariaLabel: string,
+  ) {
+    return (
+      <select
+        id={id}
+        aria-label={ariaLabel}
+        className={inputClass}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">— buiten de reis —</option>
+        {byCountry.map(([country, list]) => (
+          <optgroup key={country} label={country}>
+            {list.map((dest) => (
+              <option key={dest.id} value={dest.id}>
+                {dest.name}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <Modal title={leg ? "Transport bewerken" : "Nieuw transport"} onClose={onClose}>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass} htmlFor="transport-date">
+              Datum
+            </label>
+            <input
+              id="transport-date"
+              type="date"
+              className={inputClass}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="transport-mode">
+              Vervoer
+            </label>
+            <select
+              id="transport-mode"
+              className={inputClass}
+              value={mode}
+              onChange={(e) => setMode(e.target.value as TransportMode)}
+            >
+              {TRANSPORT_MODES.map((transportMode) => (
+                <option key={transportMode} value={transportMode}>
+                  {MODE_ICON[transportMode]} {transportMode}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass} htmlFor="transport-from">
+              Van
+            </label>
+            {destinationSelect("transport-from", fromId, setFromId, "Vertrekbestemming")}
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="transport-to">
+              Naar
+            </label>
+            {destinationSelect("transport-to", toId, setToId, "Aankomstbestemming")}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="transport-label">
+            Omschrijving
+          </label>
+          <input
+            id="transport-label"
+            className={inputClass}
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder={labelSuggestion}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="transport-cost">
+            Geschatte kosten (€, leeg = onbekend)
+          </label>
+          <input
+            id="transport-cost"
+            className={inputClass}
+            inputMode="decimal"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="transport-notes">
+            Notities
+          </label>
+          <textarea
+            id="transport-notes"
+            className={inputClass}
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <div className="flex justify-between pt-1">
+          {leg ? (
             <button type="button" className={dangerButton} onClick={remove}>
               Verwijderen
             </button>

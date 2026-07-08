@@ -172,10 +172,13 @@ test("JSON met kapotte referentie wordt geweigerd met een duidelijke fout", asyn
 test("segment bewerken: duur en status aanpassen werkt door in de planning", async ({ page }) => {
   await openFreshApp(page);
 
-  // Open het Kyoto-verblijf en maak er 4 nachten van.
-  await page.getByRole("button", { name: /Kyoto/ }).first().click();
+  // Open het Kyoto-verblijf en maak er 4 nachten van. "nachten Kyoto" matcht
+  // de segmentkaart, niet de transportlegs "Takayama – Kyoto"/"Kyoto – Tokyo".
+  await page.getByRole("button", { name: /nachten Kyoto/ }).click();
   await expect(page.getByRole("heading", { name: "Verblijf bewerken" })).toBeVisible();
   await page.getByLabel("Nachten").fill("4");
+  // Bewust niet meeschuiven: we testen hier de gatdetectie.
+  await page.getByRole("dialog").getByRole("checkbox").uncheck();
   await page.getByRole("button", { name: "Opslaan" }).click();
 
   // Totaal zakt van 126 naar 123 en de aansluiting toont een gat.

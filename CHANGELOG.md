@@ -11,6 +11,12 @@ krijgt die sectie een versienummer en datum.
 
 ### Toegevoegd
 
+- Transportbeheer in de UI: transportmomenten toevoegen, bewerken en verwijderen
+  vanuit de tijdlijn (datum, vervoerwijze, van/naar-bestemming, kosten, notities).
+  Verwijderen koppelt budgetposten die ernaar verwijzen automatisch los.
+- Kettingverschuiving: wanneer je een verblijf langer/korter maakt of verplaatst,
+  biedt de segmenteditor aan om alle latere verblijven en transporten in één keer
+  mee te schuiven, zodat de planning sluitend blijft.
 - Ontwikkel-tooling: Biome als linter/formatter (met `npm run verify` als ene
   controlepoort), pre-commit hook via husky + lint-staged, coverage-script,
   typecheck voor de e2e-laag, CI met lint-stap en Playwright-browsercache,

@@ -27,6 +27,8 @@ type UIState = {
   setEditingBudgetItemId: (id: EditorTarget) => void;
   editingDestinationId: EditorTarget;
   setEditingDestinationId: (id: EditorTarget) => void;
+  editingTransportId: EditorTarget;
+  setEditingTransportId: (id: EditorTarget) => void;
 };
 
 export const useUIStore = create<UIState>((set) => ({
@@ -38,4 +40,6 @@ export const useUIStore = create<UIState>((set) => ({
   setEditingBudgetItemId: (editingBudgetItemId) => set({ editingBudgetItemId }),
   editingDestinationId: null,
   setEditingDestinationId: (editingDestinationId) => set({ editingDestinationId }),
+  editingTransportId: null,
+  setEditingTransportId: (editingTransportId) => set({ editingTransportId }),
 }));
