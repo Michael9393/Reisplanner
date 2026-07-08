@@ -289,6 +289,7 @@ function DestinationEditor({
         .map(({ rowId: _rowId, ...entry }) => entry)
         .sort((a, b) => a.period.localeCompare(b.period)),
       notes,
+      infoUrl: destination?.infoUrl ?? null,
     };
     try {
       if (destination) {

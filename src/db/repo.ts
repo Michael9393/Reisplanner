@@ -11,6 +11,7 @@ import type { TripDocument } from "../domain/schema";
 import {
   budgetItemSchema,
   destinationSchema,
+  ideaSchema,
   itinerarySegmentSchema,
   packingItemSchema,
   parseTripDocument,
@@ -19,6 +20,7 @@ import {
 import type {
   BudgetItemRecord,
   DestinationRecord,
+  IdeaRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
   TransportLegRecord,
@@ -60,6 +62,8 @@ const destinationInputSchema = destinationSchema.omit({ id: true });
 const destinationPatchSchema = destinationInputSchema.partial();
 const transportInputSchema = transportLegSchema.omit({ id: true });
 const transportPatchSchema = transportInputSchema.partial();
+const ideaInputSchema = ideaSchema.omit({ id: true, createdAt: true });
+const ideaPatchSchema = ideaInputSchema.partial();
 
 /** In v1 is er precies één actieve reis: de eerste (en enige) in de tabel. */
 export async function getActiveTrip(db: ReisplannerDB): Promise<TripRecord | undefined> {
@@ -74,6 +78,7 @@ const ALL_TABLES = [
   "budgetCategories",
   "budgetItems",
   "packingItems",
+  "ideas",
 ] as const;
 
 /**
@@ -91,6 +96,7 @@ export async function importDocument(db: ReisplannerDB, doc: TripDocument): Prom
     await db.budgetCategories.bulkAdd(records.budgetCategories);
     await db.budgetItems.bulkAdd(records.budgetItems);
     await db.packingItems.bulkAdd(records.packingItems);
+    await db.ideas.bulkAdd(records.ideas);
   });
 }
 
@@ -114,6 +120,7 @@ export async function buildExportDocument(
       budgetCategories: await db.budgetCategories.where("tripId").equals(tripId).toArray(),
       budgetItems: await db.budgetItems.where("tripId").equals(tripId).toArray(),
       packingItems: await db.packingItems.where("tripId").equals(tripId).toArray(),
+      ideas: await db.ideas.where("tripId").equals(tripId).toArray(),
     });
   });
 
@@ -460,6 +467,70 @@ export async function deletePackingItem(
     await db.packingItems.delete(itemId);
     await touchTrip(db, tripId);
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* Kladblok                                                            */
+/* ------------------------------------------------------------------ */
+
+export type IdeaInput = Omit<IdeaRecord, "id" | "tripId" | "createdAt">;
+
+export async function addIdea(
+  db: ReisplannerDB,
+  tripId: string,
+  input: IdeaInput,
+): Promise<string> {
+  const valid = validateInput(ideaInputSchema, input, "idee");
+  const id = newId();
+  await db.transaction("rw", db.ideas, db.trips, async () => {
+    await db.ideas.add({ id, tripId, createdAt: now(), ...valid });
+    await touchTrip(db, tripId);
+  });
+  return id;
+}
+
+export async function updateIdea(
+  db: ReisplannerDB,
+  tripId: string,
+  ideaId: string,
+  changes: Partial<IdeaInput>,
+): Promise<void> {
+  const valid = validateInput(ideaPatchSchema, changes, "idee");
+  await db.transaction("rw", db.ideas, db.trips, async () => {
+    await db.ideas.update(ideaId, valid);
+    await touchTrip(db, tripId);
+  });
+}
+
+export async function deleteIdea(db: ReisplannerDB, tripId: string, ideaId: string): Promise<void> {
+  await db.transaction("rw", db.ideas, db.trips, async () => {
+    await db.ideas.delete(ideaId);
+    await touchTrip(db, tripId);
+  });
+}
+
+/**
+ * Promoveert een kladblok-idee tot volwaardige bestemming, in één transactie:
+ * óf de bestemming bestaat en het idee is weg, óf er verandert niets.
+ */
+export async function promoteIdea(
+  db: ReisplannerDB,
+  tripId: string,
+  ideaId: string,
+  input: DestinationInput,
+): Promise<string> {
+  const valid = validateInput(destinationInputSchema, input, "bestemming");
+  const id = newId();
+  await db.transaction("rw", db.ideas, db.destinations, db.trips, async () => {
+    const idea = await db.ideas.get(ideaId);
+    if (!idea || idea.tripId !== tripId) {
+      throw new Error("Dit idee bestaat niet meer; ververs het kladblok.");
+    }
+    await db.destinations.add({ id, tripId, ...valid });
+    await db.ideas.delete(ideaId);
+    await touchTrip(db, tripId);
+  });
+  return id;
 }
 
 /* ------------------------------------------------------------------ */

@@ -52,6 +52,7 @@ describe("addDestination / updateDestination", () => {
       status: "idee",
       seasonal: [{ period: "2027-08-H2", rating: 4, hazards: ["drukte"], note: "" }],
       notes: "Optie vanuit Tokyo.",
+      infoUrl: null,
     });
 
     const stored = await db.destinations.get(id);
@@ -73,6 +74,7 @@ describe("addDestination / updateDestination", () => {
         status: "idee",
         seasonal: [],
         notes: "",
+        infoUrl: null,
       }),
     ).rejects.toThrow(/Ongeldige invoer/);
 

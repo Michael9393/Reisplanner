@@ -6,7 +6,7 @@
     "endDate": "2027-09-13",
     "durationWeeks": 18,
     "currency": "EUR",
-    "schemaVersion": 1
+    "schemaVersion": 2
   },
   "destinations": [
     {
@@ -30,7 +30,8 @@
           "note": "Warm en overwegend droog, goede periode voor stad en Muur."
         }
       ],
-      "notes": "Aankomststad. Muurbezoek: Mutianyu of Jiankou."
+      "notes": "Aankomststad. Muurbezoek: Mutianyu of Jiankou.",
+      "infoUrl": null
     },
     {
       "id": "cn-xian",
@@ -53,7 +54,8 @@
           "note": "Kan al boven de 30°C komen."
         }
       ],
-      "notes": "Terracottaleger, stadsmuur fietsen, Muslim Quarter."
+      "notes": "Terracottaleger, stadsmuur fietsen, Muslim Quarter.",
+      "infoUrl": null
     },
     {
       "id": "cn-chengdu",
@@ -76,7 +78,8 @@
           "note": "Begin van het natte, benauwde seizoen."
         }
       ],
-      "notes": "Pandacentrum vroeg in de ochtend bezoeken."
+      "notes": "Pandacentrum vroeg in de ochtend bezoeken.",
+      "infoUrl": null
     },
     {
       "id": "cn-zhangjiajie",
@@ -99,7 +102,8 @@
           "note": "Kans op regen en mist tussen de pilaren."
         }
       ],
-      "notes": "Avatar-bergen; Tianmen Mountain als dagtrip."
+      "notes": "Avatar-bergen; Tianmen Mountain als dagtrip.",
+      "infoUrl": null
     },
     {
       "id": "tw-taipei",
@@ -122,7 +126,8 @@
           "note": "Heet en vochtig, maar veel binnenopties."
         }
       ],
-      "notes": "Basis voor dagtrips: Jiufen, Yangmingshan, Beitou."
+      "notes": "Basis voor dagtrips: Jiufen, Yangmingshan, Beitou.",
+      "infoUrl": null
     },
     {
       "id": "tw-hualien",
@@ -139,7 +144,8 @@
           "note": "Oostkust: kans op stevige buien, verder groen en rustig."
         }
       ],
-      "notes": "Start van de fietsroute langs de oostkust. Fietsen nog niet hard gepland."
+      "notes": "Start van de fietsroute langs de oostkust. Fietsen nog niet hard gepland.",
+      "infoUrl": null
     },
     {
       "id": "tw-taitung",
@@ -156,7 +162,8 @@
           "note": "Warm; vroeg vertrekken op de fiets."
         }
       ],
-      "notes": "East Rift Valley of kustroute; Green Island als optie."
+      "notes": "East Rift Valley of kustroute; Green Island als optie.",
+      "infoUrl": null
     },
     {
       "id": "tw-kaohsiung",
@@ -179,7 +186,8 @@
           "note": "Tyfoonseizoen komt op gang; niet te laat in juli vertrekken."
         }
       ],
-      "notes": "Vertrekpunt richting Japan; Lotus Pond en Cijin-eiland."
+      "notes": "Vertrekpunt richting Japan; Lotus Pond en Cijin-eiland.",
+      "infoUrl": null
     },
     {
       "id": "tw-alishan",
@@ -196,7 +204,8 @@
           "note": "Koel bergklimaat als pauze van de hitte; middagbuien."
         }
       ],
-      "notes": "Alternatief of aanvulling als het fietsplan niet doorgaat."
+      "notes": "Alternatief of aanvulling als het fietsplan niet doorgaat.",
+      "infoUrl": null
     },
     {
       "id": "jp-sapporo",
@@ -219,7 +228,8 @@
           "note": "Ideale zomer: 20-25°C."
         }
       ],
-      "notes": "Aankomst vanuit Taiwan; basis voor Hokkaido."
+      "notes": "Aankomst vanuit Taiwan; basis voor Hokkaido.",
+      "infoUrl": null
     },
     {
       "id": "jp-furano",
@@ -242,7 +252,8 @@
           "note": "Piek van de lavendel is ook piek van de drukte."
         }
       ],
-      "notes": "Fietsen tussen de velden van Biei; Blue Pond."
+      "notes": "Fietsen tussen de velden van Biei; Blue Pond.",
+      "infoUrl": null
     },
     {
       "id": "jp-aomori",
@@ -265,7 +276,8 @@
           "note": "Nebuta-festival (2-7 aug): spectaculair maar erg druk."
         }
       ],
-      "notes": "Oirase-kloof en Towada-meer vanuit hier."
+      "notes": "Oirase-kloof en Towada-meer vanuit hier.",
+      "infoUrl": null
     },
     {
       "id": "jp-sendai",
@@ -288,7 +300,8 @@
           "note": "Tanabata-festival (6-8 aug)."
         }
       ],
-      "notes": "Twijfelgeval: eventueel inkorten richting de Alpen."
+      "notes": "Twijfelgeval: eventueel inkorten richting de Alpen.",
+      "infoUrl": null
     },
     {
       "id": "jp-matsumoto",
@@ -311,7 +324,8 @@
           "note": "Alpen koel, het dal warm; vakantiedrukte op hutten."
         }
       ],
-      "notes": "Kamikochi en Norikura; kasteel van Matsumoto."
+      "notes": "Kamikochi en Norikura; kasteel van Matsumoto.",
+      "infoUrl": null
     },
     {
       "id": "jp-takayama",
@@ -328,7 +342,8 @@
           "note": "Warm in het dal; ochtenden en bergdorpen aangenaam."
         }
       ],
-      "notes": "Oude centrum, ochtendmarkten; Shirakawa-go als dagtrip."
+      "notes": "Oude centrum, ochtendmarkten; Shirakawa-go als dagtrip.",
+      "infoUrl": null
     },
     {
       "id": "jp-kyoto",
@@ -351,7 +366,8 @@
           "note": "Obon-vakantie (rond 13-16 aug): druk én heet."
         }
       ],
-      "notes": "Bewuste keuze ondanks hitte; alternatief is Kyoto inkorten."
+      "notes": "Bewuste keuze ondanks hitte; alternatief is Kyoto inkorten.",
+      "infoUrl": null
     },
     {
       "id": "jp-tokyo",
@@ -368,7 +384,8 @@
           "note": "Hoogzomer: heet; kans op tyfonen neemt toe richting september."
         }
       ],
-      "notes": "Afsluiting Japan; veel airco-vriendelijke opties."
+      "notes": "Afsluiting Japan; veel airco-vriendelijke opties.",
+      "infoUrl": null
     },
     {
       "id": "kr-busan",
@@ -391,7 +408,8 @@
           "note": "Aangenamer; tyfoonseizoen piekt, weerbericht volgen."
         }
       ],
-      "notes": "Aankomst vanuit Tokyo; Gamcheon, Haeundae, tempel aan zee."
+      "notes": "Aankomst vanuit Tokyo; Gamcheon, Haeundae, tempel aan zee.",
+      "infoUrl": null
     },
     {
       "id": "kr-jeju",
@@ -414,7 +432,8 @@
           "note": "Goed fiets- en wandelweer; Hallasan bij helder weer."
         }
       ],
-      "notes": "Rondje eiland fietsen (± 4 dagen) of Olle-trails."
+      "notes": "Rondje eiland fietsen (± 4 dagen) of Olle-trails.",
+      "infoUrl": null
     },
     {
       "id": "kr-seoraksan",
@@ -431,7 +450,8 @@
           "note": "Fris bergweer, vóór de herfstkleurendrukte van oktober."
         }
       ],
-      "notes": "Ulsanbawi-hike; verblijf in Sokcho aan de kust."
+      "notes": "Ulsanbawi-hike; verblijf in Sokcho aan de kust.",
+      "infoUrl": null
     },
     {
       "id": "kr-seoul",
@@ -454,7 +474,8 @@
           "note": "Een van de beste periodes voor Seoul."
         }
       ],
-      "notes": "Eindpunt van de reis; paleizen, Bukhansan, markten."
+      "notes": "Eindpunt van de reis; paleizen, Bukhansan, markten.",
+      "infoUrl": null
     }
   ],
   "itinerary": [
@@ -1458,5 +1479,6 @@
       "packed": false,
       "notes": ""
     }
-  ]
+  ],
+  "ideas": []
 }

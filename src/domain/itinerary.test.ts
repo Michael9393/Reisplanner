@@ -38,6 +38,7 @@ function destination(id: string, country: string): DestinationRecord {
     status: "vast",
     seasonal: [],
     notes: "",
+    infoUrl: null,
   };
 }
 

@@ -3,6 +3,7 @@ import type {
   BudgetCategoryRecord,
   BudgetItemRecord,
   DestinationRecord,
+  IdeaRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
   TransportLegRecord,
@@ -24,6 +25,7 @@ export class ReisplannerDB extends Dexie {
   budgetCategories!: EntityTable<BudgetCategoryRecord, "id">;
   budgetItems!: EntityTable<BudgetItemRecord, "id">;
   packingItems!: EntityTable<PackingItemRecord, "id">;
+  ideas!: EntityTable<IdeaRecord, "id">;
 
   constructor(name = "reisplanner") {
     super(name);
@@ -37,6 +39,11 @@ export class ReisplannerDB extends Dexie {
       budgetCategories: "id, tripId",
       budgetItems: "id, tripId, categoryId, destinationId, itinerarySegmentId, transportId",
       packingItems: "id, tripId, category",
+    });
+    // v2: kladblok-ideeën; createdAt-index voor chronologische sortering.
+    // Bestaande tabellen verhuizen automatisch mee naar deze versie.
+    this.version(2).stores({
+      ideas: "id, tripId, createdAt",
     });
   }
 }

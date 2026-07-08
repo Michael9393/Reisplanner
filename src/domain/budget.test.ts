@@ -47,6 +47,7 @@ function fixture(): BudgetContext {
         status: "vast",
         seasonal: [],
         notes: "",
+        infoUrl: null,
       },
       {
         id: "d-jp",
@@ -58,6 +59,7 @@ function fixture(): BudgetContext {
         status: "vast",
         seasonal: [],
         notes: "",
+        infoUrl: null,
       },
     ],
     segments: [

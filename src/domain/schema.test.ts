@@ -23,6 +23,7 @@ function minimalDoc() {
         status: "vast",
         seasonal: [{ period: "2027-05-H1", rating: 4, hazards: ["drukte"], note: "" }],
         notes: "",
+        infoUrl: null as string | null,
       },
     ],
     itinerary: [
@@ -66,6 +67,17 @@ function minimalDoc() {
       ],
     },
     packing: [{ id: "p1", category: "Kleding", item: "Regenjas", packed: false, notes: "" }],
+    ideas: [
+      {
+        id: "i1",
+        name: "Nikko",
+        country: "",
+        coords: null as { lat: number; lng: number } | null,
+        notes: "",
+        infoUrl: null as string | null,
+        createdAt: "2026-07-08T10:00:00.000Z",
+      },
+    ],
   };
 }
 
@@ -199,6 +211,57 @@ describe("parseTripDocument", () => {
       notes: "",
     }));
     expect(parseTripDocument(tooMany).ok).toBe(false);
+  });
+});
+
+describe("migratie v1 → v2", () => {
+  /** Een geldig v1-document: zonder ideas-collectie en zonder infoUrl. */
+  function v1Doc() {
+    const doc = minimalDoc() as Record<string, unknown>;
+    doc.meta = { ...(doc.meta as Record<string, unknown>), schemaVersion: 1 };
+    delete doc.ideas;
+    const destinations = doc.destinations as Record<string, unknown>[];
+    for (const dest of destinations) delete dest.infoUrl;
+    return doc;
+  }
+
+  it("migreert een v1-document naar v2 met lege ideas en infoUrl null", () => {
+    const result = parseTripDocument(v1Doc());
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.migratedFrom).toBe(1);
+      expect(result.doc.meta.schemaVersion).toBe(2);
+      expect(result.doc.ideas).toEqual([]);
+      expect(result.doc.destinations.every((d) => d.infoUrl === null)).toBe(true);
+    }
+  });
+
+  it("weigert een v1-document met onbekende velden ook ná migratie (strict)", () => {
+    const doc = v1Doc();
+    (doc.destinations as Record<string, unknown>[])[0].kleur = "paars";
+    expect(parseTripDocument(doc).ok).toBe(false);
+  });
+
+  it("weigert dubbele idee-ids", () => {
+    const doc = minimalDoc();
+    doc.ideas.push({ ...doc.ideas[0] });
+    const result = parseTripDocument(doc);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors[0]).toContain("Kladblok");
+  });
+
+  it("weigert een infoUrl die geen https-link is", () => {
+    const httpDoc = minimalDoc();
+    httpDoc.destinations[0].infoUrl = "http://nl.wikipedia.org/wiki/Beijing";
+    expect(parseTripDocument(httpDoc).ok).toBe(false);
+
+    const bogusDoc = minimalDoc();
+    bogusDoc.ideas[0].infoUrl = "geen url";
+    expect(parseTripDocument(bogusDoc).ok).toBe(false);
+
+    const okDoc = minimalDoc();
+    okDoc.destinations[0].infoUrl = "https://nl.wikipedia.org/wiki/Beijing";
+    expect(parseTripDocument(okDoc).ok).toBe(true);
   });
 });
 

@@ -53,6 +53,7 @@ describe("importDocument + buildExportDocument", () => {
     expect(await db.budgetCategories.count()).toBe(9);
     expect(await db.budgetItems.count()).toBeGreaterThan(25);
     expect(await db.packingItems.count()).toBeGreaterThan(20);
+    expect(await db.ideas.count()).toBe(0);
   });
 
   it("dataverliestest: export → wissen → import → identieke export", async () => {

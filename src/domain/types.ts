@@ -53,6 +53,22 @@ export type DestinationRecord = {
   status: Status;
   seasonal: SeasonalPeriod[];
   notes: string;
+  /** Externe informatielink (https), bv. een Wikipedia-artikel. */
+  infoUrl: string | null;
+};
+
+/** Kladblok-idee: een lichte notitie voor een mogelijke bestemming. */
+export type IdeaRecord = {
+  id: string;
+  tripId: string;
+  name: string;
+  /** Leeg ("") zolang het land nog onbekend is. */
+  country: string;
+  coords: { lat: number; lng: number } | null;
+  notes: string;
+  infoUrl: string | null;
+  /** ISO-datetime; bepaalt de (stabiele) kladblokvolgorde. */
+  createdAt: string;
 };
 
 export type ItinerarySegmentRecord = {
