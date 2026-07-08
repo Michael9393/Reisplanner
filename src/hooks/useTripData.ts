@@ -5,6 +5,7 @@ import type {
   BudgetCategoryRecord,
   BudgetItemRecord,
   DestinationRecord,
+  IdeaRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
   TransportLegRecord,
@@ -20,6 +21,7 @@ export type TripData = {
   budgetCategories: BudgetCategoryRecord[];
   budgetItems: BudgetItemRecord[];
   packingItems: PackingItemRecord[];
+  ideas: IdeaRecord[];
 };
 
 /**
@@ -54,6 +56,10 @@ export function useTripData(): TripData {
     () => (tripId ? db.packingItems.where("tripId").equals(tripId).toArray() : []),
     [tripId],
   );
+  const ideas = useLiveQuery(
+    () => (tripId ? db.ideas.where("tripId").equals(tripId).sortBy("createdAt") : []),
+    [tripId],
+  );
 
   return {
     trip,
@@ -63,5 +69,6 @@ export function useTripData(): TripData {
     budgetCategories: budgetCategories ?? [],
     budgetItems: budgetItems ?? [],
     packingItems: packingItems ?? [],
+    ideas: ideas ?? [],
   };
 }

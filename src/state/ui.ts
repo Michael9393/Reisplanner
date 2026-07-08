@@ -4,12 +4,20 @@
  */
 import { create } from "zustand";
 
-export type Tab = "planning" | "kaart" | "bestemmingen" | "budget" | "paklijst" | "data";
+export type Tab =
+  | "planning"
+  | "kaart"
+  | "bestemmingen"
+  | "kladblok"
+  | "budget"
+  | "paklijst"
+  | "data";
 
 export const TABS: { id: Tab; label: string }[] = [
   { id: "planning", label: "Planning" },
   { id: "kaart", label: "Kaart" },
   { id: "bestemmingen", label: "Bestemmingen" },
+  { id: "kladblok", label: "Kladblok" },
   { id: "budget", label: "Budget" },
   { id: "paklijst", label: "Paklijst" },
   { id: "data", label: "Back-up & data" },
@@ -29,6 +37,11 @@ type UIState = {
   setEditingDestinationId: (id: EditorTarget) => void;
   editingTransportId: EditorTarget;
   setEditingTransportId: (id: EditorTarget) => void;
+  editingIdeaId: EditorTarget;
+  setEditingIdeaId: (id: EditorTarget) => void;
+  /** Idee dat via de bestemmingseditor gepromoveerd wordt (null = geen). */
+  promotingIdeaId: string | null;
+  setPromotingIdeaId: (id: string | null) => void;
 };
 
 export const useUIStore = create<UIState>((set) => ({
@@ -42,4 +55,8 @@ export const useUIStore = create<UIState>((set) => ({
   setEditingDestinationId: (editingDestinationId) => set({ editingDestinationId }),
   editingTransportId: null,
   setEditingTransportId: (editingTransportId) => set({ editingTransportId }),
+  editingIdeaId: null,
+  setEditingIdeaId: (editingIdeaId) => set({ editingIdeaId }),
+  promotingIdeaId: null,
+  setPromotingIdeaId: (promotingIdeaId) => set({ promotingIdeaId }),
 }));
