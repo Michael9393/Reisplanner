@@ -4,13 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--
-      CSP: alles self, behalve OpenStreetMap-kaarttegels (img-src) en de
-      Vite HMR-websocket in ontwikkeling (connect-src ws:).
+      CSP: alles self, behalve OpenStreetMap-kaarttegels (img-src), de
+      Vite HMR-websocket in ontwikkeling (connect-src ws:) en twee bewuste
+      data-uitzonderingen in connect-src: Open-Meteo (klimaatnormalen voor
+      de automatische seizoensratings) en Photon (plaats-autocomplete).
       'unsafe-inline' voor styles is nodig voor Leaflet en inline styles.
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' ws: wss: https://archive-api.open-meteo.com https://photon.komoot.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="no-referrer" />
     <title>Reisplanner Oost-Azië 2027</title>
