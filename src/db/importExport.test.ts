@@ -5,7 +5,9 @@
  */
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it } from "vitest";
+import { parseTripDocumentFromText, type TripDocument } from "../domain/schema";
 import { ReisplannerDB } from "./db";
+import { serializeDocument } from "./mapping";
 import {
   addSegment,
   buildExportDocument,
@@ -17,9 +19,7 @@ import {
   updateSegment,
   wipeDatabase,
 } from "./repo";
-import { serializeDocument } from "./mapping";
 import { getSeedDocument } from "./seed";
-import { parseTripDocumentFromText, type TripDocument } from "../domain/schema";
 
 let counter = 0;
 const openDbs: ReisplannerDB[] = [];
@@ -152,9 +152,9 @@ describe("repo-laag-validatie", () => {
     ).rejects.toThrow(/Ongeldige invoer/);
     expect(await db.itinerarySegments.count()).toBe(20);
 
-    await expect(
-      updateSegment(db, TRIP_ID, "seg-kyoto", { nights: -3 }),
-    ).rejects.toThrow(/Ongeldige invoer/);
+    await expect(updateSegment(db, TRIP_ID, "seg-kyoto", { nights: -3 })).rejects.toThrow(
+      /Ongeldige invoer/,
+    );
     expect((await db.itinerarySegments.get("seg-kyoto"))?.nights).toBe(7);
   });
 
@@ -162,9 +162,9 @@ describe("repo-laag-validatie", () => {
     const db = freshDb();
     await importDocument(db, getSeedDocument());
 
-    await expect(
-      updateBudgetItem(db, TRIP_ID, "b-buffer", { amountActual: -50 }),
-    ).rejects.toThrow(/Ongeldige invoer/);
+    await expect(updateBudgetItem(db, TRIP_ID, "b-buffer", { amountActual: -50 })).rejects.toThrow(
+      /Ongeldige invoer/,
+    );
     expect((await db.budgetItems.get("b-buffer"))?.amountActual).toBeNull();
 
     await expect(

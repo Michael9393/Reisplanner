@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import seedJson from "../seed/oost-azie-2027.json";
-import {
-  SCHEMA_VERSION,
-  parseTripDocument,
-  parseTripDocumentFromText,
-} from "./schema";
+import { parseTripDocument, parseTripDocumentFromText, SCHEMA_VERSION } from "./schema";
 
 function minimalDoc() {
   return {
@@ -25,14 +21,19 @@ function minimalDoc() {
         coords: { lat: 39.9, lng: 116.4 },
         activities: ["stad"],
         status: "vast",
-        seasonal: [
-          { period: "2027-05-H1", rating: 4, hazards: ["drukte"], note: "" },
-        ],
+        seasonal: [{ period: "2027-05-H1", rating: 4, hazards: ["drukte"], note: "" }],
         notes: "",
       },
     ],
     itinerary: [
-      { id: "s1", destinationId: "d1", startDate: "2027-05-10", nights: 7, status: "vast", notes: "" },
+      {
+        id: "s1",
+        destinationId: "d1",
+        startDate: "2027-05-10",
+        nights: 7,
+        status: "vast",
+        notes: "",
+      },
     ],
     transport: [
       {

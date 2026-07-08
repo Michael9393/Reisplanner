@@ -40,10 +40,14 @@ Vereist Node 22+.
 ```bash
 npm install
 npm run dev        # ontwikkelserver
-npm run build      # typecheck + productie-build in dist/
-npm test           # unit tests (Vitest): schema, datums, budget, roundtrip
-npx playwright test  # e2e: de import/export-rondetest in een echte browser
+npm run verify     # typecheck + lint (Biome) + unit tests + build — draai dit vóór elke commit
+npm run e2e        # Playwright: de import/export-rondetest in een echte browser
+npm run test:coverage  # unit tests met coverage-rapport
 ```
+
+Een pre-commit hook (husky + lint-staged) formatteert en lint gewijzigde bestanden
+automatisch; CI draait daarnaast het volledige verify-pad en de e2e-suite, en
+Dependabot opent maandelijks een verzamel-PR met dependency-updates.
 
 Voor de e2e-tests is eenmalig `npx playwright install chromium` nodig, of zet
 `PW_CHROMIUM=/pad/naar/chromium` als er al een browser-binary is.
@@ -69,6 +73,8 @@ src/
   seed/      oost-azie-2027.json (voorbeeldreis, tevens exportvoorbeeld)
 e2e/         Playwright-rondetest (export → wissen → import zonder dataverlies)
 ```
+
+Wijzigingen per versie staan in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Deploy (GitHub Pages)
 

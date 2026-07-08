@@ -1,12 +1,12 @@
+import { latLngBounds } from "leaflet";
 import { useEffect, useMemo } from "react";
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
-import { latLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { addDays, formatDayMonthNL } from "../domain/dates";
+import { STATUSES } from "../domain/types";
 import type { TripData } from "../hooks/useTripData";
 import { useUIStore } from "../state/ui";
-import { addDays, formatDayMonthNL } from "../domain/dates";
 import { STATUS_COLOR, StatusBadge } from "./shared";
-import { STATUSES } from "../domain/types";
 
 /**
  * MapContainer-props gelden alleen bij initialisatie; dit child centreert de
@@ -15,13 +15,11 @@ import { STATUSES } from "../domain/types";
 function FitBounds({ positions }: { positions: [number, number][] }) {
   const map = useMap();
   const key = positions.map((p) => p.join(",")).join(";");
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` vat de posities samen; positions zelf krijgt elke render een nieuwe identiteit
   useEffect(() => {
     if (positions.length > 0) {
       map.fitBounds(latLngBounds(positions), { padding: [40, 40] });
     }
-    // `key` vat de posities samen; positions zelf krijgt elke render een
-    // nieuwe identiteit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, map]);
   return null;
 }
@@ -143,8 +141,7 @@ export function MapView({ data }: { data: TripData }) {
         </div>
       </div>
       <p className="text-xs text-slate-400">
-        De routelijn volgt de volgorde van de planning. Kaarttegels vereisen een
-        internetverbinding.
+        De routelijn volgt de volgorde van de planning. Kaarttegels vereisen een internetverbinding.
       </p>
     </div>
   );

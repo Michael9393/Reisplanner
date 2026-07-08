@@ -1,7 +1,7 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import type { Hazard, Status, TransportMode } from "../domain/types";
+import { type ReactNode, useEffect, useRef } from "react";
 import type { SeasonAssessment } from "../domain/season";
 import { hasSeasonWarning } from "../domain/season";
+import type { Hazard, Status, TransportMode } from "../domain/types";
 
 export const STATUS_STYLE: Record<Status, string> = {
   vast: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -149,6 +149,8 @@ export function Modal({
   }, [onClose]);
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: de backdrop is een muis-only extraatje; toetsenbord sluit via Escape en de sluitknop
+    // biome-ignore lint/a11y/useKeyWithClickEvents: idem — Escape-afhandeling staat hierboven in de keydown-listener
     <div
       className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:items-center"
       onMouseDown={(event) => {

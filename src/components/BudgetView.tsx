@@ -1,33 +1,33 @@
 import { useMemo, useState } from "react";
 import { db } from "../db/db";
-import type { TripData } from "../hooks/useTripData";
-import { useUIStore } from "../state/ui";
-import type { BudgetItemRecord, TripRecord } from "../domain/types";
 import {
+  addBudgetItem,
+  type BudgetItemInput,
+  deleteBudgetItem,
+  updateBudgetItem,
+} from "../db/repo";
+import {
+  type BudgetContext,
   GLOBAL_BUCKET,
+  type Totals,
   totalsByCategory,
   totalsByCountry,
   totalsBySegment,
   totalsOverall,
-  type BudgetContext,
-  type Totals,
 } from "../domain/budget";
 import { addDays, formatDayMonthNL } from "../domain/dates";
-import { countriesInTripOrder } from "../domain/itinerary";
 import { formatEuro } from "../domain/format";
+import { countriesInTripOrder } from "../domain/itinerary";
+import type { BudgetItemRecord, TripRecord } from "../domain/types";
+import type { TripData } from "../hooks/useTripData";
+import { useUIStore } from "../state/ui";
 import {
-  addBudgetItem,
-  deleteBudgetItem,
-  updateBudgetItem,
-  type BudgetItemInput,
-} from "../db/repo";
-import {
-  Modal,
-  SectionCard,
   dangerButton,
   inputClass,
   labelClass,
+  Modal,
   primaryButton,
+  SectionCard,
   secondaryButton,
 } from "./shared";
 
@@ -503,8 +503,8 @@ function BudgetItemEditor({
             )}
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Globale posten (visa, verzekering, gear, buffer) tellen mee in het totaal zonder aan
-            een bestemming te hangen.
+            Globale posten (visa, verzekering, gear, buffer) tellen mee in het totaal zonder aan een
+            bestemming te hangen.
           </p>
         </div>
 

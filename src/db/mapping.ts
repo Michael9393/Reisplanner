@@ -72,7 +72,13 @@ export function recordsToDocument(records: TripRecords): TripDocument {
   const { trip } = records;
 
   const destinations = [...records.destinations]
-    .sort(byKey((d) => d.country, (d) => d.name, (d) => d.id))
+    .sort(
+      byKey(
+        (d) => d.country,
+        (d) => d.name,
+        (d) => d.id,
+      ),
+    )
     .map((d) => ({
       id: d.id,
       name: d.name,
@@ -80,19 +86,22 @@ export function recordsToDocument(records: TripRecords): TripDocument {
       coords: { lat: d.coords.lat, lng: d.coords.lng },
       activities: [...d.activities],
       status: d.status,
-      seasonal: [...d.seasonal]
-        .sort(byKey((s) => s.period))
-        .map((s) => ({
-          period: s.period,
-          rating: s.rating,
-          hazards: [...s.hazards] as Hazard[],
-          note: s.note,
-        })),
+      seasonal: [...d.seasonal].sort(byKey((s) => s.period)).map((s) => ({
+        period: s.period,
+        rating: s.rating,
+        hazards: [...s.hazards] as Hazard[],
+        note: s.note,
+      })),
       notes: d.notes,
     }));
 
   const itinerary = [...records.itinerarySegments]
-    .sort(byKey((s) => s.startDate, (s) => s.id))
+    .sort(
+      byKey(
+        (s) => s.startDate,
+        (s) => s.id,
+      ),
+    )
     .map((s) => ({
       id: s.id,
       destinationId: s.destinationId,
@@ -103,7 +112,12 @@ export function recordsToDocument(records: TripRecords): TripDocument {
     }));
 
   const transport = [...records.transportLegs]
-    .sort(byKey((t) => t.date, (t) => t.id))
+    .sort(
+      byKey(
+        (t) => t.date,
+        (t) => t.id,
+      ),
+    )
     .map((t) => ({
       id: t.id,
       fromDestinationId: t.fromDestinationId,
@@ -116,7 +130,12 @@ export function recordsToDocument(records: TripRecords): TripDocument {
     }));
 
   const categories = [...records.budgetCategories]
-    .sort(byKey((c) => c.label, (c) => c.id))
+    .sort(
+      byKey(
+        (c) => c.label,
+        (c) => c.id,
+      ),
+    )
     .map((c) => ({ id: c.id, label: c.label }));
 
   const categoryLabel = new Map(categories.map((c) => [c.id, c.label]));
@@ -143,7 +162,13 @@ export function recordsToDocument(records: TripRecords): TripDocument {
     }));
 
   const packing = [...records.packingItems]
-    .sort(byKey((p) => p.category, (p) => p.item, (p) => p.id))
+    .sort(
+      byKey(
+        (p) => p.category,
+        (p) => p.item,
+        (p) => p.id,
+      ),
+    )
     .map((p) => ({
       id: p.id,
       category: p.category,
@@ -172,5 +197,5 @@ export function recordsToDocument(records: TripRecords): TripDocument {
 
 /** Serialiseert een exportdocument leesbaar en deterministisch voor Git. */
 export function serializeDocument(doc: TripDocument): string {
-  return JSON.stringify(doc, null, 2) + "\n";
+  return `${JSON.stringify(doc, null, 2)}\n`;
 }

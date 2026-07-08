@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import { db } from "../db/db";
-import type { TripData } from "../hooks/useTripData";
-import type { TripRecord } from "../domain/types";
-import { MAX_IMPORT_BYTES, parseTripDocumentFromText } from "../domain/schema";
 import { buildExportFile, importDocument, markExported, wipeDatabase } from "../db/repo";
 import { getSeedDocument } from "../db/seed";
-import { downloadTextFile } from "../ui/download";
 import { formatTimestampNL } from "../domain/format";
-import { SectionCard, dangerButton, primaryButton, secondaryButton } from "./shared";
+import { MAX_IMPORT_BYTES, parseTripDocumentFromText } from "../domain/schema";
+import type { TripRecord } from "../domain/types";
+import type { TripData } from "../hooks/useTripData";
+import { downloadTextFile } from "../ui/download";
+import { dangerButton, primaryButton, SectionCard, secondaryButton } from "./shared";
 
 /** Exportactie + statusmelding, gedeeld tussen header en data-tab. */
 export function useExportAction(trip: TripRecord | null) {
@@ -23,7 +23,9 @@ export function useExportAction(trip: TripRecord | null) {
       downloadTextFile(filename, json);
       await markExported(db, trip.id);
       setIsError(false);
-      setMessage(`Export gedownload als "${filename}". Bewaar het bestand buiten de browser, bij voorkeur in Git.`);
+      setMessage(
+        `Export gedownload als "${filename}". Bewaar het bestand buiten de browser, bij voorkeur in Git.`,
+      );
     } catch (error: unknown) {
       setIsError(true);
       setMessage(error instanceof Error ? error.message : String(error));
@@ -113,13 +115,12 @@ export function ImportPanel({ hasExistingTrip }: { hasExistingTrip: boolean }) {
   );
 }
 
-export function DataView({ data, trip }: { data: TripData; trip: TripRecord }) {
+export function BackupView({ data, trip }: { data: TripData; trip: TripRecord }) {
   const exportAction = useExportAction(trip);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | null>(null);
   const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
 
-  const unsavedChanges =
-    trip.lastExportedAt === null || trip.updatedAt > trip.lastExportedAt;
+  const unsavedChanges = trip.lastExportedAt === null || trip.updatedAt > trip.lastExportedAt;
 
   async function reloadSeed() {
     if (!window.confirm("De huidige reis vervangen door de meegeleverde voorbeeldreis?")) return;
@@ -197,8 +198,8 @@ export function DataView({ data, trip }: { data: TripData; trip: TripRecord }) {
 
         <SectionCard title="Importeren">
           <p className="mb-3 text-sm text-slate-500">
-            Laadt een eerder geëxporteerd bestand en vervangt de huidige reis volledig. Het
-            bestand wordt eerst gevalideerd; bij fouten blijft de bestaande reis onaangetast.
+            Laadt een eerder geëxporteerd bestand en vervangt de huidige reis volledig. Het bestand
+            wordt eerst gevalideerd; bij fouten blijft de bestaande reis onaangetast.
           </p>
           <ImportPanel hasExistingTrip />
         </SectionCard>

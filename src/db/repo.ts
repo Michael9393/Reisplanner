@@ -5,7 +5,8 @@
  * achterlaat.
  */
 import type { ZodType } from "zod";
-import type { ReisplannerDB } from "./db";
+import { isValidISODate } from "../domain/dates";
+import type { PlanShift } from "../domain/itinerary";
 import type { TripDocument } from "../domain/schema";
 import {
   budgetItemSchema,
@@ -13,15 +14,18 @@ import {
   itinerarySegmentSchema,
   packingItemSchema,
   parseTripDocument,
+  transportLegSchema,
 } from "../domain/schema";
-import { documentToRecords, recordsToDocument, serializeDocument } from "./mapping";
 import type {
   BudgetItemRecord,
   DestinationRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
+  TransportLegRecord,
   TripRecord,
 } from "../domain/types";
+import type { ReisplannerDB } from "./db";
+import { documentToRecords, recordsToDocument, serializeDocument } from "./mapping";
 
 function now(): string {
   return new Date().toISOString();
@@ -54,6 +58,8 @@ const budgetItemPatchSchema = budgetItemInputSchema.partial();
 const packingItemInputSchema = packingItemSchema.omit({ id: true });
 const destinationInputSchema = destinationSchema.omit({ id: true });
 const destinationPatchSchema = destinationInputSchema.partial();
+const transportInputSchema = transportLegSchema.omit({ id: true });
+const transportPatchSchema = transportInputSchema.partial();
 
 /** In v1 is er precies één actieve reis: de eerste (en enige) in de tabel. */
 export async function getActiveTrip(db: ReisplannerDB): Promise<TripRecord | undefined> {
@@ -93,7 +99,10 @@ export async function importDocument(db: ReisplannerDB, doc: TripDocument): Prom
  * wordt vóór teruggave nogmaals tegen het schema gevalideerd: een export die
  * niet aan het eigen contract voldoet, mag de app niet verlaten.
  */
-export async function buildExportDocument(db: ReisplannerDB, tripId: string): Promise<TripDocument> {
+export async function buildExportDocument(
+  db: ReisplannerDB,
+  tripId: string,
+): Promise<TripDocument> {
   const doc = await db.transaction("r", [...ALL_TABLES], async () => {
     const trip = await db.trips.get(tripId);
     if (!trip) throw new Error(`Reis "${tripId}" bestaat niet.`);
@@ -239,7 +248,11 @@ export type SegmentInput = {
   notes: string;
 };
 
-export async function addSegment(db: ReisplannerDB, tripId: string, input: SegmentInput): Promise<string> {
+export async function addSegment(
+  db: ReisplannerDB,
+  tripId: string,
+  input: SegmentInput,
+): Promise<string> {
   const valid = validateInput(segmentInputSchema, input, "verblijf");
   const id = newId();
   await db.transaction("rw", db.itinerarySegments, db.trips, async () => {
@@ -266,7 +279,11 @@ export async function updateSegment(
  * Verwijdert een segment en koppelt budgetitems die ernaar verwijzen los
  * (itinerarySegmentId → null), zodat er nooit kapotte referenties ontstaan.
  */
-export async function deleteSegment(db: ReisplannerDB, tripId: string, segmentId: string): Promise<void> {
+export async function deleteSegment(
+  db: ReisplannerDB,
+  tripId: string,
+  segmentId: string,
+): Promise<void> {
   await db.transaction("rw", db.itinerarySegments, db.budgetItems, db.trips, async () => {
     await db.budgetItems
       .where("itinerarySegmentId")
@@ -277,13 +294,100 @@ export async function deleteSegment(db: ReisplannerDB, tripId: string, segmentId
   });
 }
 
+/**
+ * Werkt een verblijf bij en verschuift in dezelfde transactie alle latere
+ * verblijven en transporten (berekend met planShiftForSegmentEdit in
+ * domain/itinerary.ts), zodat de keten sluitend blijft: óf alles schuift,
+ * óf niets.
+ */
+export async function updateSegmentWithShift(
+  db: ReisplannerDB,
+  tripId: string,
+  segmentId: string,
+  changes: Partial<SegmentInput>,
+  shift: PlanShift,
+): Promise<void> {
+  const valid = validateInput(segmentPatchSchema, changes, "verblijf");
+  const invalidDate = [
+    ...shift.segmentChanges.map((c) => c.startDate),
+    ...shift.transportChanges.map((c) => c.date),
+  ].find((date) => !isValidISODate(date));
+  if (invalidDate) {
+    throw new Error(`Ongeldige verschuivingsdatum: ${invalidDate}`);
+  }
+
+  await db.transaction("rw", db.itinerarySegments, db.transportLegs, db.trips, async () => {
+    await db.itinerarySegments.update(segmentId, valid);
+    for (const change of shift.segmentChanges) {
+      await db.itinerarySegments.update(change.id, { startDate: change.startDate });
+    }
+    for (const change of shift.transportChanges) {
+      await db.transportLegs.update(change.id, { date: change.date });
+    }
+    await touchTrip(db, tripId);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Transport                                                           */
+/* ------------------------------------------------------------------ */
+
+export type TransportInput = Omit<TransportLegRecord, "id" | "tripId">;
+
+export async function addTransportLeg(
+  db: ReisplannerDB,
+  tripId: string,
+  input: TransportInput,
+): Promise<string> {
+  const valid = validateInput(transportInputSchema, input, "transport");
+  const id = newId();
+  await db.transaction("rw", db.transportLegs, db.trips, async () => {
+    await db.transportLegs.add({ id, tripId, ...valid });
+    await touchTrip(db, tripId);
+  });
+  return id;
+}
+
+export async function updateTransportLeg(
+  db: ReisplannerDB,
+  tripId: string,
+  legId: string,
+  changes: Partial<TransportInput>,
+): Promise<void> {
+  const valid = validateInput(transportPatchSchema, changes, "transport");
+  await db.transaction("rw", db.transportLegs, db.trips, async () => {
+    await db.transportLegs.update(legId, valid);
+    await touchTrip(db, tripId);
+  });
+}
+
+/**
+ * Verwijdert een transport en koppelt budgetitems die ernaar verwijzen los
+ * (transportId → null), zodat er nooit kapotte referenties ontstaan.
+ */
+export async function deleteTransportLeg(
+  db: ReisplannerDB,
+  tripId: string,
+  legId: string,
+): Promise<void> {
+  await db.transaction("rw", db.transportLegs, db.budgetItems, db.trips, async () => {
+    await db.budgetItems.where("transportId").equals(legId).modify({ transportId: null });
+    await db.transportLegs.delete(legId);
+    await touchTrip(db, tripId);
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Budget                                                              */
 /* ------------------------------------------------------------------ */
 
 export type BudgetItemInput = Omit<BudgetItemRecord, "id" | "tripId">;
 
-export async function addBudgetItem(db: ReisplannerDB, tripId: string, input: BudgetItemInput): Promise<string> {
+export async function addBudgetItem(
+  db: ReisplannerDB,
+  tripId: string,
+  input: BudgetItemInput,
+): Promise<string> {
   const valid = validateInput(budgetItemInputSchema, input, "budgetpost");
   const id = newId();
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
@@ -306,7 +410,11 @@ export async function updateBudgetItem(
   });
 }
 
-export async function deleteBudgetItem(db: ReisplannerDB, tripId: string, itemId: string): Promise<void> {
+export async function deleteBudgetItem(
+  db: ReisplannerDB,
+  tripId: string,
+  itemId: string,
+): Promise<void> {
   await db.transaction("rw", db.budgetItems, db.trips, async () => {
     await db.budgetItems.delete(itemId);
     await touchTrip(db, tripId);
@@ -343,7 +451,11 @@ export async function setPackingItemPacked(
   });
 }
 
-export async function deletePackingItem(db: ReisplannerDB, tripId: string, itemId: string): Promise<void> {
+export async function deletePackingItem(
+  db: ReisplannerDB,
+  tripId: string,
+  itemId: string,
+): Promise<void> {
   await db.transaction("rw", db.packingItems, db.trips, async () => {
     await db.packingItems.delete(itemId);
     await touchTrip(db, tripId);

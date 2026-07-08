@@ -6,8 +6,8 @@
  * De vertaling van en naar Dexie-records staat in db/mapping.ts.
  */
 import { z } from "zod";
-import { HAZARDS, STATUSES, TRANSPORT_MODES } from "./types";
 import { isValidISODate } from "./dates";
+import { HAZARDS, STATUSES, TRANSPORT_MODES } from "./types";
 
 export const SCHEMA_VERSION = 1;
 
@@ -25,11 +25,9 @@ const isoDate = z
   .string()
   .refine(isValidISODate, { error: "moet een geldige datum in YYYY-MM-DD-formaat zijn" });
 
-const halfMonth = z
-  .string()
-  .regex(/^\d{4}-(0[1-9]|1[0-2])-H[12]$/, {
-    error: "moet een halve maand zijn in het formaat YYYY-MM-H1 of YYYY-MM-H2",
-  });
+const halfMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-H[12]$/, {
+  error: "moet een halve maand zijn in het formaat YYYY-MM-H1 of YYYY-MM-H2",
+});
 
 const id = z.string().min(1).max(200);
 const shortText = z.string().min(1).max(200);
@@ -170,7 +168,10 @@ export function migrateDocument(raw: unknown): MigrationResult {
   for (let v = version; v < SCHEMA_VERSION; v++) {
     const migrate = migrations[v];
     if (!migrate) {
-      return { ok: false, error: `Er is geen migratie beschikbaar van schemaversie ${v} naar ${v + 1}.` };
+      return {
+        ok: false,
+        error: `Er is geen migratie beschikbaar van schemaversie ${v} naar ${v + 1}.`,
+      };
     }
     doc = migrate(doc);
     doc.meta = { ...(doc.meta as Record<string, unknown>), schemaVersion: v + 1 };
@@ -198,12 +199,36 @@ function findDuplicateIds(label: string, ids: string[], errors: string[]): void 
 export function findReferenceErrors(doc: TripDocument): string[] {
   const errors: string[] = [];
 
-  findDuplicateIds("Bestemmingen", doc.destinations.map((d) => d.id), errors);
-  findDuplicateIds("Planning", doc.itinerary.map((s) => s.id), errors);
-  findDuplicateIds("Transport", doc.transport.map((t) => t.id), errors);
-  findDuplicateIds("Budgetcategorieën", doc.budget.categories.map((c) => c.id), errors);
-  findDuplicateIds("Budgetitems", doc.budget.items.map((i) => i.id), errors);
-  findDuplicateIds("Paklijst", doc.packing.map((p) => p.id), errors);
+  findDuplicateIds(
+    "Bestemmingen",
+    doc.destinations.map((d) => d.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Planning",
+    doc.itinerary.map((s) => s.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Transport",
+    doc.transport.map((t) => t.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Budgetcategorieën",
+    doc.budget.categories.map((c) => c.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Budgetitems",
+    doc.budget.items.map((i) => i.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Paklijst",
+    doc.packing.map((p) => p.id),
+    errors,
+  );
 
   const destinationIds = new Set(doc.destinations.map((d) => d.id));
   const segmentIds = new Set(doc.itinerary.map((s) => s.id));
@@ -220,7 +245,9 @@ export function findReferenceErrors(doc: TripDocument): string[] {
 
   for (const leg of doc.transport) {
     if (leg.fromDestinationId !== null && !destinationIds.has(leg.fromDestinationId)) {
-      errors.push(`Transport "${leg.id}" vertrekt vanaf onbekende bestemming "${leg.fromDestinationId}".`);
+      errors.push(
+        `Transport "${leg.id}" vertrekt vanaf onbekende bestemming "${leg.fromDestinationId}".`,
+      );
     }
     if (leg.toDestinationId !== null && !destinationIds.has(leg.toDestinationId)) {
       errors.push(`Transport "${leg.id}" gaat naar onbekende bestemming "${leg.toDestinationId}".`);
@@ -229,16 +256,24 @@ export function findReferenceErrors(doc: TripDocument): string[] {
 
   for (const item of doc.budget.items) {
     if (!categoryIds.has(item.categoryId)) {
-      errors.push(`Budgetitem "${item.label}" verwijst naar onbekende categorie "${item.categoryId}".`);
+      errors.push(
+        `Budgetitem "${item.label}" verwijst naar onbekende categorie "${item.categoryId}".`,
+      );
     }
     if (item.destinationId !== null && !destinationIds.has(item.destinationId)) {
-      errors.push(`Budgetitem "${item.label}" verwijst naar onbekende bestemming "${item.destinationId}".`);
+      errors.push(
+        `Budgetitem "${item.label}" verwijst naar onbekende bestemming "${item.destinationId}".`,
+      );
     }
     if (item.itinerarySegmentId !== null && !segmentIds.has(item.itinerarySegmentId)) {
-      errors.push(`Budgetitem "${item.label}" verwijst naar onbekend segment "${item.itinerarySegmentId}".`);
+      errors.push(
+        `Budgetitem "${item.label}" verwijst naar onbekend segment "${item.itinerarySegmentId}".`,
+      );
     }
     if (item.transportId !== null && !transportIds.has(item.transportId)) {
-      errors.push(`Budgetitem "${item.label}" verwijst naar onbekend transport "${item.transportId}".`);
+      errors.push(
+        `Budgetitem "${item.label}" verwijst naar onbekend transport "${item.transportId}".`,
+      );
     }
   }
 
@@ -286,7 +321,9 @@ export function parseTripDocumentFromText(text: string): ParseResult {
   } catch {
     return {
       ok: false,
-      errors: ["Het bestand is geen geldige JSON. Controleer of het een onbeschadigd exportbestand is."],
+      errors: [
+        "Het bestand is geen geldige JSON. Controleer of het een onbeschadigd exportbestand is.",
+      ],
     };
   }
   return parseTripDocument(data);
