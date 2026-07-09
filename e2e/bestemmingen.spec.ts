@@ -6,6 +6,11 @@
 import { expect, type Page, test } from "@playwright/test";
 
 async function openFreshApp(page: Page) {
+  // Geen echt extern verkeer in de tests: de plaats-autocomplete en de
+  // achtergrond-klimaatfetch degraderen dan stil (dat pad is bewust zo
+  // gebouwd) en de tests blijven netwerk-onafhankelijk.
+  await page.route("https://photon.komoot.io/**", (route) => route.abort());
+  await page.route("https://archive-api.open-meteo.com/**", (route) => route.abort());
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Oost-Azië 2027" })).toBeVisible();
 }

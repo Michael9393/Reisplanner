@@ -9,7 +9,7 @@ import { z } from "zod";
 import { isValidISODate } from "./dates";
 import { HAZARDS, STATUSES, TRANSPORT_MODES } from "./types";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Bovengrens voor importbestanden; een reisdocument is ~100 KB. */
 export const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
@@ -34,6 +34,18 @@ const shortText = z.string().min(1).max(200);
 const notesText = z.string().max(5000);
 const amount = z.number().min(0).max(100_000_000);
 
+// Alleen https: een geïmporteerd document mag nooit een onveilige of
+// javascript:-link de UI in smokkelen.
+const httpsUrl = z
+  .url()
+  .max(500)
+  .refine((url) => url.startsWith("https://"), { error: "moet een https-link zijn" });
+
+const coordsSchema = z.strictObject({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+
 export const seasonalPeriodSchema = z.strictObject({
   period: halfMonth,
   rating: z.number().int().min(1).max(5),
@@ -45,14 +57,22 @@ export const destinationSchema = z.strictObject({
   id,
   name: shortText,
   country: shortText,
-  coords: z.strictObject({
-    lat: z.number().min(-90).max(90),
-    lng: z.number().min(-180).max(180),
-  }),
+  coords: coordsSchema,
   activities: z.array(z.string().max(200)).max(100),
   status: z.enum(STATUSES),
   seasonal: z.array(seasonalPeriodSchema).max(200),
   notes: notesText,
+  infoUrl: httpsUrl.nullable(),
+});
+
+export const ideaSchema = z.strictObject({
+  id,
+  name: shortText,
+  country: z.string().max(200),
+  coords: coordsSchema.nullable(),
+  notes: notesText,
+  infoUrl: httpsUrl.nullable(),
+  createdAt: z.iso.datetime(),
 });
 
 export const itinerarySegmentSchema = z.strictObject({
@@ -127,6 +147,7 @@ export const tripDocumentSchema = z.strictObject({
     items: z.array(budgetItemSchema).max(MAX_COLLECTION),
   }),
   packing: z.array(packingItemSchema).max(MAX_COLLECTION),
+  ideas: z.array(ideaSchema).max(MAX_COLLECTION),
 });
 
 export type TripDocument = z.infer<typeof tripDocumentSchema>;
@@ -138,9 +159,23 @@ export type TripMeta = z.infer<typeof tripMetaSchema>;
 
 /**
  * Migraties van oudere schemaversies naar de huidige. `migrations[n]` zet een
- * document van versie n om naar versie n+1. Nu leeg: versie 1 is de eerste.
+ * document van versie n om naar versie n+1.
  */
-const migrations: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {};
+const migrations: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {
+  // v1 → v2: kladblok-collectie `ideas` en informatielink `infoUrl` op
+  // bestemmingen. `{ infoUrl: null, ...d }`: een al aanwezig veld wint.
+  1: (doc) => ({
+    ...doc,
+    destinations: Array.isArray(doc.destinations)
+      ? doc.destinations.map((d: unknown) =>
+          typeof d === "object" && d !== null && !Array.isArray(d)
+            ? { infoUrl: null, ...(d as Record<string, unknown>) }
+            : d,
+        )
+      : doc.destinations,
+    ideas: [],
+  }),
+};
 
 export type MigrationResult =
   | { ok: true; data: unknown; migratedFrom: number | null }
@@ -227,6 +262,11 @@ export function findReferenceErrors(doc: TripDocument): string[] {
   findDuplicateIds(
     "Paklijst",
     doc.packing.map((p) => p.id),
+    errors,
+  );
+  findDuplicateIds(
+    "Kladblok",
+    doc.ideas.map((i) => i.id),
     errors,
   );
 

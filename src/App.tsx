@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { BackupView, ImportPanel, useExportAction } from "./components/BackupView";
 import { BudgetView } from "./components/BudgetView";
 import { DestinationsView } from "./components/DestinationsView";
+import { KladblokView } from "./components/KladblokView";
 import { PackingView } from "./components/PackingView";
 import { PlanningView } from "./components/PlanningView";
 import { primaryButton } from "./components/shared";
@@ -78,6 +79,7 @@ export default function App() {
               </Suspense>
             )}
             {tab === "bestemmingen" && <DestinationsView data={data} trip={trip} />}
+            {tab === "kladblok" && <KladblokView data={data} trip={trip} />}
             {tab === "budget" && <BudgetView data={data} trip={trip} />}
             {tab === "paklijst" && <PackingView data={data} trip={trip} />}
             {tab === "data" && <BackupView data={data} trip={trip} />}

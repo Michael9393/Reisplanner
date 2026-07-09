@@ -10,6 +10,7 @@ import type {
   BudgetItemRecord,
   DestinationRecord,
   Hazard,
+  IdeaRecord,
   ItinerarySegmentRecord,
   PackingItemRecord,
   TransportLegRecord,
@@ -24,6 +25,7 @@ export type TripRecords = {
   budgetCategories: BudgetCategoryRecord[];
   budgetItems: BudgetItemRecord[];
   packingItems: PackingItemRecord[];
+  ideas: IdeaRecord[];
 };
 
 /** Omgevingsonafhankelijke stringvergelijking (bewust geen localeCompare). */
@@ -60,6 +62,7 @@ export function documentToRecords(doc: TripDocument, now: string): TripRecords {
     budgetCategories: doc.budget.categories.map((c) => ({ tripId, ...c })),
     budgetItems: doc.budget.items.map((i) => ({ tripId, ...i })),
     packingItems: doc.packing.map((p) => ({ tripId, ...p })),
+    ideas: doc.ideas.map((i) => ({ tripId, ...i })),
   };
 }
 
@@ -93,6 +96,7 @@ export function recordsToDocument(records: TripRecords): TripDocument {
         note: s.note,
       })),
       notes: d.notes,
+      infoUrl: d.infoUrl,
     }));
 
   const itinerary = [...records.itinerarySegments]
@@ -177,6 +181,23 @@ export function recordsToDocument(records: TripRecords): TripDocument {
       notes: p.notes,
     }));
 
+  const ideas = [...records.ideas]
+    .sort(
+      byKey(
+        (i) => i.createdAt,
+        (i) => i.id,
+      ),
+    )
+    .map((i) => ({
+      id: i.id,
+      name: i.name,
+      country: i.country,
+      coords: i.coords ? { lat: i.coords.lat, lng: i.coords.lng } : null,
+      notes: i.notes,
+      infoUrl: i.infoUrl,
+      createdAt: i.createdAt,
+    }));
+
   return {
     meta: {
       id: trip.id,
@@ -192,6 +213,7 @@ export function recordsToDocument(records: TripRecords): TripDocument {
     transport,
     budget: { categories, items },
     packing,
+    ideas,
   };
 }
 

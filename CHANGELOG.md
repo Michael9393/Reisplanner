@@ -11,6 +11,20 @@ krijgt die sectie een versienummer en datum.
 
 ### Toegevoegd
 
+- Automatische seizoensratings: de knop "Seizoensdata ophalen" in de
+  bestemmingseditor zet klimaatnormalen van Open-Meteo (2015–2024) om naar
+  ratings per halve maand met hazards (hitte, kou, regen, tyfoonseizoen).
+  Nieuwe bestemmingen zonder seizoensdata worden na het opslaan automatisch
+  op de achtergrond gevuld; automatisch gegenereerde periodes zijn herkenbaar
+  aan de "Automatisch"-notitie en handwerk wordt nooit stil overschreven.
+- Tabblad **Kladblok**: losse bestemmingsideeën snel vastleggen (alleen een
+  naam is genoeg; land, coördinaten, notitie en link optioneel) en later met
+  één knop promoveren tot volwaardige bestemming in de planner.
+- Plaats-autocomplete (Photon-geocoder) in de bestemmingseditor en het
+  kladblok: typ bijvoorbeeld "kyo" en kies Kyoto — naam, land, coördinaten en
+  een Wikipedia-informatielink worden automatisch ingevuld. Zonder internet
+  blijft het veld een gewoon tekstveld.
+
 - Transportbeheer in de UI: transportmomenten toevoegen, bewerken en verwijderen
   vanuit de tijdlijn (datum, vervoerwijze, van/naar-bestemming, kosten, notities).
   Verwijderen koppelt budgetposten die ernaar verwijzen automatisch los.
@@ -32,6 +46,12 @@ krijgt die sectie een versienummer en datum.
 
 ### Gewijzigd
 
+- Exportschema naar versie 2: nieuwe `ideas`-collectie (kladblok) en een
+  optionele `infoUrl` per bestemming. Oude exports (versie 1) migreren
+  automatisch bij import.
+- De Content-Security-Policy staat twee externe databronnen toe:
+  `archive-api.open-meteo.com` (klimaatdata) en `photon.komoot.io`
+  (plaatssuggesties).
 - Bestemming verwijderen is geblokkeerd zolang er verblijven naar verwijzen;
   transport- en budgetverwijzingen worden automatisch losgekoppeld.
 - De kaart (Leaflet) wordt lazy geladen: hoofdbundel van ± 600 kB naar ± 458 kB.

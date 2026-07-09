@@ -31,7 +31,7 @@ test("rondetest: seed, export, alles wissen, import zonder dataverlies", async (
   const exportPath = test.info().outputPath("export-1.json");
   await download.saveAs(exportPath);
   const firstExport = fs.readFileSync(exportPath, "utf8");
-  expect(firstExport).toContain('"schemaVersion": 1');
+  expect(firstExport).toContain('"schemaVersion": 2');
 
   // Wis alle lokale data (dialoog bevestigen).
   await page.getByRole("button", { name: "Back-up & data" }).click();
